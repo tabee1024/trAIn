@@ -1,0 +1,189 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Body and Background */
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Use a high-quality fitness-related image. This path assumes your image is at assets/bg-fitness.jpg */
+    background: url('assets/bg-fitness.jpg') no-repeat center center/cover;
+}
+
+/* Overlay for forms - Added a dark overlay for better text contrast over the background image */
+.overlay {
+    position: fixed; /* Use fixed to cover the entire viewport */
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.65); /* Slightly darker for better readability */
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* Container */
+.container {
+    position: relative;
+    z-index: 2;
+    background: rgba(255,255,255,0.98); /* Almost opaque white for clean forms */
+    border-radius: 20px;
+    padding: 40px 30px;
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+    /* Stronger, more defined shadow */
+    box-shadow: 0 15px 50px rgba(0,0,0,0.5); 
+    animation: fadeIn 0.8s ease;
+}
+
+/* Project Name */
+.project-name {
+    font-size: 44px; /* Slightly larger */
+    font-weight: 800; /* Bolder */
+    /* The attractive fitness-themed gradient (red/pink to orange/red) */
+    background: linear-gradient(45deg,#ff416c,#ff4b2b); 
+    -webkit-background-clip: text;
+    background-clip: text; /* Standard property added for compatibility */
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+}
+
+/* Headings */
+h2 {
+    color: #333;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+/* Input Groups */
+.input-group {
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+label {
+    color: #333; /* Darker label for better visibility */
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 15px;
+}
+
+input {
+    width: 100%;
+    padding: 15px 18px;
+    border-radius: 12px;
+    border: 1px solid #ddd; /* Lighter border when not focused */
+    outline: none;
+    font-size: 16px;
+    transition: all 0.3s;
+    background-color: #f9f9f9; /* Slightly off-white input field */
+}
+
+input:focus {
+    border-color: #ff416c;
+    /* Clean, energetic focus shadow */
+    box-shadow: 0 0 10px rgba(255,65,108,0.5); 
+    background-color: #fff;
+}
+
+/* Buttons */
+button {
+    width: 100%;
+    padding: 18px; /* Bigger button for easier tapping */
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(45deg,#ff416c,#ff4b2b);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.3s;
+    letter-spacing: 0.5px;
+}
+
+button:hover {
+    transform: translateY(-4px); /* More pronounced lift */
+    box-shadow: 0 10px 25px rgba(255,65,108,0.6); /* Stronger hover shadow */
+}
+
+/* Paragraph & Links */
+p {
+    margin-top: 20px;
+    color: #666;
+    font-size: 15px;
+}
+
+a {
+    color: #ff416c;
+    font-weight: 700; /* Bolder link */
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #ff4b2b;
+    text-decoration: underline;
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(40px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+/* Dashboard Cards - (Keeping the original card styles for consistency on the dashboard) */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card {
+    width: 100%;
+    background: linear-gradient(135deg,#ff4b2b,#ff416c);
+    color: white;
+    padding: 20px;
+    margin: 10px 0;
+    border-radius: 18px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    text-align: left;
+}
+
+.card h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 16px;
+}
+
+/* Logout Button */
+#logoutBtn {
+    width: 150px;
+    margin-top: 25px;
+    background: #555; /* Different color for logout to stand out */
+}
+
+#logoutBtn:hover {
+    background: #333;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 480px){
+    .container {
+        padding: 30px 20px;
+        width: 90%;
+    }
+}
