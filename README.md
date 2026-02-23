@@ -1,60 +1,66 @@
-# trAIn
-# Project Purpose and Scope:
-This project aims to assist in developing the knowledge and capabilities of any user who is wanting to get into fitness and improve their health. This application is designed for individuals who are beginners or have absolutely no experience in what a proper fitness journey looks like. This application will aid in guiding and correcting individuals in proper workout form and motivate them to improve their fitness.
+# 🏋️‍♂️ trAIn
 
-The capacity of our project will see the user in
-- Creating a profile using a short entry survey
-- Logging Goals and Motivations
-- Reading and Viewing our workout guide with tips on effective exercise
-- Selecting one of a few workouts that are beginner friendly yet effective
-- Getting real time feedback on form throughout the specified workout
-- Getting a post workout assessment that aligns with personal goals
-- Getting a personalized helpful and motivational coach statement through machine learning and AI
-- Viewing statistics of old workouts in the User’s private profile to see where improvements are needed
+> **Empowering fitness journeys through real-time AI guidance and computer vision.**
 
-# Sections
-- Main
-- Frontend Development
-- Backend Development
-- Camera
-- Database
+[![Language](https://img.shields.io/badge/Language-Kotlin-purple.svg)](https://kotlinlang.org/)
+[![Database](https://img.shields.io/badge/Database-Firebase-orange.svg)](https://firebase.google.com/)
+[![IDE](https://img.shields.io/badge/IDE-Android%20Studio-blue.svg)](https://developer.android.com/studio)
 
-# Main
-All of our structures and frameworks together as a collaborative effort for all members.
+---
 
-# Frontend Development
-UI/UX pages, User profile accessibility, User Survey feedback, Assets and Design methods/models
-Testfrontend branch
-Responsibilities
-Reenu: Designed and created home, workouts, workout detail, profile, and about screens.
+## 🎯 Project Overview
+**trAIn** is an intelligent fitness companion designed specifically for beginners. Starting a fitness journey can be intimidating; our application bridges that gap by providing a private, real-time "AI Coach" that ensures proper form, tracks progress, and keeps users motivated.
 
-# Backend Development
-User data collection, Data management, Implementation of Camera, Implementation of body overlay visualization, Implementation of AI coach
-Testbackend branch
-Responsibilities
-Vishal: Created User Signup/Login page
-Vishal & Christian: Design and work on user data storage through SQL
-Brian: Work on implementation of camera API
-Christian: Work on implementation of user body overlay visualization
-Jesus: Work on implementation of User data display
-Jesus & Christian: Work on implementation of motivational AI coach
+### Core Features
+* **Intelligent Onboarding:** Personalized profile creation via entry surveys to define goals and motivations.
+* **Computer Vision Form Correction:** Real-time feedback using pose estimation to ensure exercises are performed safely.
+* **AI Coaching:** Post-workout assessments powered by machine learning to provide personalized motivational feedback.
+* **Progress Tracking:** Comprehensive statistics and historical workout data to visualize improvement over time.
+* **Curated Content:** Access to a beginner-friendly library of effective, low-barrier exercises.
 
-# Camera
-Initial storage for our camera setup for getting our user pose estimation process and detection of the bodies landmarks
-CamX branch
-Responsibilities: 
-Brian:  Creating our live feed view so users can see their body outline and to show in what parts of their workouts need to be corrected. For example how to properly perform a push-up.
+---
 
-# Database
-Initial storage of our database design and user data collection methods
-Signup/-Signin branch
-Responsibilities
-Vishal: Create the database where we will store user data such as emails and password along with personal data
+## 🛠 Tech Stack
 
+| Category | Tools & Technologies |
+| :--- | :--- |
+| **Language** | Kotlin |
+| **UI/UX Design** | Figma |
+| **Development** | Android Studio |
+| **Database** | Firebase / SQL |
+| **Integrations** | CameraX API, Machine Learning Models |
 
-# Technologies: 
-- Languages: Kotlin
-- Design Tools: Figma
-- Development Tools: Android Studio
-- Database: Firebase
-- Devices: Virtual Machines, Android phones
+---
+
+## 👥 Project Structure & Responsibilities
+
+### 🎨 Frontend & UI/UX
+*Maintains the user experience and visual assets.*
+* **Lead:** Reenu
+* **Focus:** Home, Workouts, Profile, and About screens; User Survey feedback loops.
+
+### ⚙️ Backend & Data Management
+*Handles authentication, data persistence, and AI logic.*
+* **Team:** Vishal, Christian, Jesus
+* **Focus:** User Auth (Signup/Login), SQL data storage, and the motivational AI coach implementation.
+
+### 👁️ Computer Vision (Camera)
+*Manages live pose estimation and body landmark detection.*
+* **Lead:** Brian
+* **Focus:** Live feed view, body outline visualization, and real-time form correction logic (e.g., push-up detection).
+
+### 🗄️ Database Strategy
+*Ensures secure and scalable user data collection.*
+* **Lead:** Vishal
+* **Focus:** Firebase/SQL integration for user credentials and personal fitness metrics.
+
+---
+
+## 🚀 Roadmap
+- [ ] Integration of advanced compound movements.
+- [ ] Expanded AI coaching feedback loop.
+- [ ] Wearable device compatibility.
+
+---
+
+*Built with ❤️ for those beginning their fitness journey.*
