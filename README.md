@@ -11,8 +11,14 @@ The capacity of our project will see the user in
 - Getting a post workout assessment that aligns with personal goals
 - Getting a personalized helpful and motivational coach statement through machine learning and AI
 - Viewing statistics of old workouts in the User’s private profile to see where improvements are needed
- 
+
 # Sections
+- Main
+- Frontend Development
+- Backend Development
+- Camera
+- Database
+
 # Main
 All of our structures and frameworks together as a collaborative effort for all members.
 
@@ -47,8 +53,8 @@ Vishal: Create the database where we will store user data such as emails and pas
 
 
 # Technologies: 
-Languages: Kotlin
-Design Tools: Figma
-Development Tools: Android Studio
-Database: Firebase
-Devices: Virtual Machines, Android phones
+- Languages: Kotlin
+- Design Tools: Figma
+- Development Tools: Android Studio
+- Database: Firebase
+- Devices: Virtual Machines, Android phones
