@@ -61,7 +61,7 @@
 ## 🚀 Roadmap
 - [ ] Integration of advanced compound movements.
 - [ ] Expanded AI coaching feedback loop.
-- [ ] Wearable device compatibility.
+- [ ] Accessibility Features.
 
 ---
 
