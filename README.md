@@ -5,6 +5,9 @@
 [![Language](https://img.shields.io/badge/Language-Kotlin-purple.svg)](https://kotlinlang.org/)
 [![Database](https://img.shields.io/badge/Database-Firebase-orange.svg)](https://firebase.google.com/)
 [![IDE](https://img.shields.io/badge/IDE-Android%20Studio-blue.svg)](https://developer.android.com/studio)
+[![Framework](https://img.shields.io/badge/UI_Framework-Jetpack_Compose-navy.svg)](https://developer.android.com/jetpack/compose)
+[![ML](https://img.shields.io/badge/ML-MediaPipe%2FMoveNet-teal.svg)](https://developers.google.com/mediapipe)
+[![VCS](https://img.shields.io/badge/VCS-GitHub-black.svg)](https://github.com/)
 
 ---
 
@@ -25,10 +28,13 @@
 | Category | Tools & Technologies |
 | :--- | :--- |
 | **Language** | Kotlin |
-| **UI/UX Design** | Figma |
+| **UI Framework** | **Jetpack Compose** |
+| **ML & Pose Detection** | **MediaPipe / MoveNet** |
+| **Design Tools** | Figma |
 | **Development** | Android Studio |
 | **Database** | Firebase / SQL |
-| **Integrations** | CameraX API, Machine Learning Models |
+| **Version Control** | **GitHub** |
+| **Integrations** | CameraX API |
 
 ---
 
