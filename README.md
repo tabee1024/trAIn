@@ -37,7 +37,7 @@
 ### 🎨 Frontend & UI/UX
 *Maintains the user experience and visual assets.*
 * **Lead:** Reenu
-* * **Team:** Tabitha, Christian, Jesus
+* **Team:** Tabitha, Christian, Jesus
 * **Focus:** Home, Workouts, Profile, and About screens; User Survey feedback loops.
 
 ### ⚙️ Backend & Data Management
