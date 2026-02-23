@@ -37,11 +37,13 @@
 ### 🎨 Frontend & UI/UX
 *Maintains the user experience and visual assets.*
 * **Lead:** Reenu
+* * **Team:** Tabitha, Christian, Jesus
 * **Focus:** Home, Workouts, Profile, and About screens; User Survey feedback loops.
 
 ### ⚙️ Backend & Data Management
 *Handles authentication, data persistence, and AI logic.*
-* **Team:** Vishal, Christian, Jesus
+* **Lead:** Christian
+* **Team:** Vishal, Brian, Jesus
 * **Focus:** User Auth (Signup/Login), SQL data storage, and the motivational AI coach implementation.
 
 ### 👁️ Computer Vision (Camera)
