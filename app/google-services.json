@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "464485255985",
+    "project_id": "train-signup-and-login",
+    "storage_bucket": "train-signup-and-login.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:464485255985:android:a0110fba98ed1b65f8fe10",
+        "android_client_info": {
+          "package_name": "com.example.trainsignupandlogin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYL-ZyfQEOqhomoeDCOm1ceaJZRBlxBBc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
