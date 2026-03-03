@@ -5,9 +5,7 @@ plugins {
 
 android {
     namespace = "com.android.example.camx"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.android.example.camx"
@@ -28,12 +26,24 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
+    }
+
+    // ✅ Fixed: Kotlin DSL syntax
+    aaptOptions {
+        noCompress("tflite", "task")
+    }
+
+    // ✅ Added: Required for ViewBinding in MainActivity
+    buildFeatures {
+        viewBinding = true
     }
 }
 
@@ -49,9 +59,7 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:1.3.4")
     implementation("androidx.camera:camera-view:1.3.4")
 
-    // 🔹 MediaPipe Tasks Vision (for pose estimation)
-    implementation("com.google.mediapipe:tasks-vision:0.10.2")
-
+    implementation("com.google.mediapipe:tasks-vision:0.10.14")
 
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)

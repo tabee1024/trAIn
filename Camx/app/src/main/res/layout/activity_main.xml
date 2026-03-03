@@ -1,32 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000"
+    tools:context=".MainActivity">
 
-    <!-- Camera preview + pose overlay -->
-    <FrameLayout
+    <!-- Camera Preview -->
+    <!-- ✅ Fixed: fitCenter ensures full body is visible without cropping -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/viewFinder"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="match_parent"
+        app:scaleType="fitCenter" />
 
-        <androidx.camera.view.PreviewView
-            android:id="@+id/viewFinder"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    <!-- Pose Overlay -->
+    <com.android.example.camx.PoseOverlay
+        android:id="@+id/poseOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent" />
 
-        <com.android.example.camx.PoseOverlay
-            android:id="@+id/poseOverlay"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    <!-- Camera Switch Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/cameraSwitchButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="16dp"
+        android:contentDescription="Switch Camera"
+        android:src="@drawable/ic_flip_camera"
+        app:backgroundTint="#88000000"
+        app:tint="@android:color/white" />
 
-    </FrameLayout>
-
-    <!-- Info text from analyzer -->
+    <!-- Status Text -->
     <TextView
         android:id="@+id/coachText"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Waiting for camera..."
-        android:padding="16dp" />
-</LinearLayout>
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="32dp"
+        android:background="#CC000000"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="Initializing..."
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+</FrameLayout>
