@@ -1,5 +1,8 @@
 package com.example.trainapp
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -21,25 +24,29 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.trainapp.ui.theme.Beige
+import com.example.trainapp.ui.theme.Brown
 import com.example.trainapp.ui.theme.DBrown
 import com.example.trainapp.ui.theme.Emperor
 import com.example.trainapp.ui.theme.Swirl
 import com.example.trainapp.ui.theme.TrAInAppTheme
 
 @Composable
-fun Squats( ){
+fun Squats(
+    videoUrl: String = "https://www.youtube.com/watch?v=YaXPRqUwItQ&t=10s"
+){
     Column(modifier = Modifier
         .fillMaxSize()
         .verticalScroll(rememberScrollState())
-        .background(color = Beige)
+        .background(color = Color.White)
     ) {
         // Top Image
         Box(
@@ -74,7 +81,7 @@ fun Squats( ){
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "A classic upper‑body exercise that strengthens your chest, shoulders, triceps, and core.",
+                text = "A foundational exercise that builds strength in the legs and core.",
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium, fontStyle = Italic),
                 fontSize = 14.sp,
                 color = Emperor
@@ -100,11 +107,48 @@ fun Squats( ){
             )
             Spacer(modifier = Modifier.height(8.dp))
 
+            WorkoutInfoRow(label = "Difficulty:", value = "Beginner - Intermediate")
+            WorkoutInfoRow(label = "Target Muscles:", value = "Quads, Glutes, Hamstrings, Core")
+            WorkoutInfoRow(label = "Recommended Sets:", value = "3–4 sets")
+            WorkoutInfoRow(label = "Reps per Set:", value = "12–20 reps")
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl))
+                    context.startActivity(intent)
+                },
+                shape = RectangleShape,
+                modifier = Modifier.fillMaxWidth().height(40.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                border = BorderStroke(width = 1.dp, color = Brown)
+            ) {
+                Text(text = "Watch Video Tutorial",
+                    color = DBrown,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                )
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "External link",
+                    tint = DBrown
+                )
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
             Text(
                 text = "How to Perform",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold), color = DBrown )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            StepItem("Stand with your feet shoulder‑width apart.")
+            StepItem("Keep your chest up and core engaged.")
+            StepItem("Push your hips back as if sitting into a chair.")
+            StepItem("Lower until your thighs are parallel to the floor.")
+            StepItem("Drive through your heels to return to standing.")
+
+            Spacer(modifier = Modifier.height(90.dp))
         }
     }
 }
