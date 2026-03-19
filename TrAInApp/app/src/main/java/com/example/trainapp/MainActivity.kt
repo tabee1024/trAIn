@@ -347,7 +347,9 @@ fun Navigation(navController: NavController) {
                 composable(Screens.Search.screen){Search()}
                 composable(Screens.Progress.screen){Progress()}
                 composable(Screens.Settings.screen){Settings()}
-                composable(Screens.PushUp.screen){Push_up()}
+                composable(Screens.PushUp.screen){
+                    Push_up(onPushUpClick = { navigationController.navigate(Screens.Search.screen) })
+                }
                 composable(Screens.Squats.screen){Squats()}
                 composable(Screens.Lunges.screen){Lunges()}
             }
