@@ -1,5 +1,8 @@
 package com.example.trainapp
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,27 +29,30 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.trainapp.ui.theme.Beige
 import com.example.trainapp.ui.theme.Brown
 import com.example.trainapp.ui.theme.DBrown
 import com.example.trainapp.ui.theme.Emperor
 import com.example.trainapp.ui.theme.Swirl
-//import androidx.navigation.compose.rememberNavController
 import com.example.trainapp.ui.theme.TrAInAppTheme
 
 @Composable
-fun Push_up( ){
+fun Push_up(
+    onPushUpClick: () -> Unit,
+    videoUrl: String = "https://www.youtube.com/watch?v=0pkjOk0EiAk"
+){
     Column(modifier = Modifier
         .fillMaxSize()
         .verticalScroll(rememberScrollState())
-        .background(color = Beige)
+        .background(color = Color.White)
     ) {
         // Top Image
         Box(
@@ -89,7 +95,7 @@ fun Push_up( ){
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {},
+                onClick = onPushUpClick,
                 colors = ButtonDefaults.buttonColors(containerColor = DBrown)
             ) {
                 Text(text = "Start Workout", color = Swirl, style = MaterialTheme.typography.bodyLarge)
@@ -111,7 +117,28 @@ fun Push_up( ){
             WorkoutInfoRow(label = "Target Muscles:", value = "Chest, Shoulders, Triceps, Core")
             WorkoutInfoRow(label = "Recommended Sets:", value = "3–4 sets")
             WorkoutInfoRow(label = "Reps per Set:", value = "10–20 reps")
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(18.dp))
+
+            Button(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl))
+                    context.startActivity(intent)
+                },
+                shape = RectangleShape,
+                modifier = Modifier.fillMaxWidth().height(40.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                border = BorderStroke(width = 1.dp, color = Brown)
+            ) {
+                Text(text = "Watch Video Tutorial",
+                    color = DBrown,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                )
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "External link",
+                    tint = DBrown
+                )
+            }
 
             Text(
                 text = "How to Perform",
@@ -126,7 +153,7 @@ fun Push_up( ){
             StepItem("Push back up to the starting position.")
             StepItem("Maintain a straight line from head to heels throughout the movement.")
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(90.dp))
 
         }
     }
@@ -175,6 +202,6 @@ fun StepItem(text: String) {
 @Composable
 fun PushUpPreview() {
     TrAInAppTheme {
-        Push_up()
+        Push_up(onPushUpClick = {})
     }
 }
