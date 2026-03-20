@@ -64,7 +64,7 @@ fun Home(
         .padding(16.dp)
         .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(70.dp))
 
         // Greeting
         Text(text = "Hello, $userName",
@@ -107,8 +107,6 @@ fun Home(
             imageRes = R.drawable.workout_image,
             onClick = onWorkoutsClick
         )
-
-        //Spacer(modifier = Modifier.height(18.dp))
 
         // FAB
         HelpFab(onClick = onFABClick)
