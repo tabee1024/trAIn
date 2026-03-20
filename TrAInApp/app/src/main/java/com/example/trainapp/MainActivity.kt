@@ -334,7 +334,7 @@ fun Navigation(navController: NavController) {
                         onGoalsClick = { navigationController.navigate(Screens.Goals.screen) },
                         onFavoritesClick = { navigationController.navigate(Screens.Progress.screen) },
                         onWorkoutsClick = { navigationController.navigate(Screens.Workouts.screen) },
-                        onFABClick = { navigationController.navigate(Screens.Help.screen){popUpTo(0)} }
+                        onFABClick = { navigationController.navigate(Screens.Help.screen) }
                     )
                 }
                 composable(Screens.Profile.screen){Profile()}
@@ -345,7 +345,13 @@ fun Navigation(navController: NavController) {
                 composable(Screens.Workouts.screen){Workouts(navigationController)}
                 composable(Screens.AboutUs.screen){AboutUs()}
                 composable(Screens.Search.screen){Search()}
-                composable(Screens.Progress.screen){Progress()}
+                composable(Screens.Progress.screen){Progress(
+                    reps = 30,
+                    accuracy = 92,
+                    timeSpent = "08:14",
+                    onExit = { navigationController.navigate(Screens.Home.screen) },
+                    onRestart = { navigationController.navigate(Screens.Workouts.screen) }
+                )}
                 composable(Screens.Settings.screen){Settings()}
                 composable(Screens.PushUp.screen){
                     Push_up(onPushUpClick = { navigationController.navigate(Screens.Search.screen) })
