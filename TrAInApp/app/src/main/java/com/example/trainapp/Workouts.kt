@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.trainapp.ui.theme.Beige
 import com.example.trainapp.ui.theme.DBrown
 import com.example.trainapp.ui.theme.TrAInAppTheme
 
@@ -45,7 +44,7 @@ import com.example.trainapp.ui.theme.TrAInAppTheme
 fun Workouts(navController: NavController) {
     Column(modifier = Modifier
         .fillMaxSize()
-        .background(color = Beige)
+        .background(color = Color.White)
         .padding(16.dp)
         .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Top,
@@ -84,15 +83,16 @@ fun WorkoutList(navController: NavController, modifier: Modifier = Modifier) {
         }
     }
 }
+
 data class Workout(
     val id: Int,
     val title: String,
     val duration: String,
     val difficulty: String,
-    //val imageResId: Int,
     val imageName: String,
     val screen: String
 )
+
 @SuppressLint("LocalContextResourcesRead", "DiscouragedApi")
 @Composable
 fun WorkoutItem(workout: Workout, navController: NavController) {
@@ -106,7 +106,6 @@ fun WorkoutItem(workout: Workout, navController: NavController) {
             .padding(vertical = 12.dp)
             .fillMaxWidth()
             .clickable {
-                //navController.navigate(workout.id.toString())
                 navController.navigate(workout.screen)
             },
         elevation = CardDefaults.cardElevation(8.dp)
