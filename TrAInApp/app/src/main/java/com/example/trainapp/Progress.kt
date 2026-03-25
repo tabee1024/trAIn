@@ -30,7 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.trainapp.ui.theme.DBrown
+import com.example.trainapp.ui.theme.Emperor
 import com.example.trainapp.ui.theme.Swirl
 import com.example.trainapp.ui.theme.TrAInAppTheme
 
@@ -60,7 +60,6 @@ fun Progress(
 
             Text(
                 text = "Workout Summary",
-                color = DBrown,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -88,7 +87,7 @@ fun Progress(
                     onClick = onExit,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = DBrown, // background color
+                        containerColor = Emperor, // background color
                         contentColor = Color.White // icon text color
                     )
                 ) {
@@ -101,7 +100,7 @@ fun Progress(
                     onClick = onRestart,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = DBrown, // background color
+                        containerColor = Emperor, // background color
                         contentColor = Color.White // icon text color
                     )
                 ) {
@@ -109,6 +108,28 @@ fun Progress(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun AccuracyIndicator(accuracy: Int) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.size(140.dp)
+    ) {
+        CircularProgressIndicator(
+            progress = {accuracy / 100f},
+            strokeWidth = 12.dp,
+            trackColor = Swirl,
+            color = Emperor,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Text(
+            text = "Accuracy: $accuracy%",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
@@ -124,10 +145,6 @@ fun WorkoutStats(
     ) {
         StatCard("Reps Completed", reps.toString())
         Spacer(modifier = Modifier.height(16.dp))
-
-        StatCard("Accuracy", "$accuracy%")
-        Spacer(modifier = Modifier.height(16.dp))
-
         StatCard("Time Spent", timeSpent)
     }
 }
@@ -139,7 +156,7 @@ fun StatCard(label: String, value: String) {
             .fillMaxWidth()
             .padding(horizontal = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        border = BorderStroke(0.5.dp, color = DBrown),
+        border = BorderStroke(0.5.dp, color = Emperor),
         colors = CardDefaults.cardColors(containerColor = Swirl)
     ) {
         Row(
@@ -151,15 +168,12 @@ fun StatCard(label: String, value: String) {
             Text(text = label,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 18.sp,
-                color = DBrown)
+                fontSize = 18.sp)
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                color = DBrown
-            )
+                fontSize = 20.sp)
         }
     }
 }
