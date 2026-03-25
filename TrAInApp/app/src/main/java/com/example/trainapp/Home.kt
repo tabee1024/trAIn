@@ -45,7 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.trainapp.ui.theme.DBrown
+import com.example.trainapp.ui.theme.Emperor
 import com.example.trainapp.ui.theme.Swirl
 import com.example.trainapp.ui.theme.TrAInAppTheme
 
@@ -69,7 +69,7 @@ fun Home(
         // Greeting
         Text(text = "Hello, $userName",
             fontSize = 20.sp,
-            color = DBrown,
+            color = Emperor,
             fontWeight = FontWeight.Medium,
             style = MaterialTheme.typography.headlineSmall
         )
@@ -154,7 +154,7 @@ fun MonitoringSection(label: String, iconRes: Int, onClick: () -> Unit) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = DBrown,
+            color = Emperor,
             fontWeight = FontWeight.Light
         )
     }
@@ -204,7 +204,7 @@ fun HelpFab(onClick: () -> Unit) {
             modifier = Modifier
                 .padding(16.dp)
                 .align(Alignment.BottomEnd),
-            containerColor = DBrown
+            containerColor = Emperor
         ) {
             Text(
                 text = "?",
