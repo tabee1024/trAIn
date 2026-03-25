@@ -156,21 +156,6 @@ fun GoalCard(
                 Text(text = goal.target, style = MaterialTheme.typography.titleMedium)
                 GoalMenu(onEdit, onDelete)
             }
-
-            LinearProgressIndicator(
-                progress = {goal.progress},
-                color = DBrown,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-            )
-
-            Spacer(Modifier.height(4.dp))
-
-            Text(
-                text = "${(goal.progress * 100).toInt()}% complete",
-                style = MaterialTheme.typography.bodySmall
-            )
         }
     }
 }
@@ -343,4 +328,3 @@ fun PreviewEditGoalDialog() {
         )
     }
 }
-
