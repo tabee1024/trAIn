@@ -33,8 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.trainapp.ui.theme.Brown
-import com.example.trainapp.ui.theme.DBrown
+import com.example.trainapp.ui.theme.Emperor
 import com.example.trainapp.ui.theme.TrAInAppTheme
 
 @Composable
@@ -50,8 +49,7 @@ fun Settings() {
         Spacer(modifier = Modifier.height(70.dp))
         Text(text = "Settings",
             style = MaterialTheme.typography.titleSmall,
-            fontSize = 30.sp,
-            color = DBrown
+            fontSize = 30.sp
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -64,7 +62,6 @@ fun Settings() {
 fun SettingsContent() {
     var darkModeEnabled by remember { mutableStateOf(false) }
     var notificationsEnabled by remember { mutableStateOf(true) }
-    var useMetricUnits by remember { mutableStateOf(true) }
     val context = LocalContext.current.applicationContext
 
     Column(modifier = Modifier
@@ -91,15 +88,6 @@ fun SettingsContent() {
             )
         }
 
-        // Units Section
-        SettingsSection(title = "Units") {
-            SettingsToggleItem(
-                title = "Use Metric Units",
-                checked = useMetricUnits,
-                onCheckedChange = { useMetricUnits = it }
-            )
-        }
-
         Spacer(modifier = Modifier.height(24.dp))
 
         // Account Section
@@ -110,9 +98,9 @@ fun SettingsContent() {
             },
             modifier = Modifier.fillMaxWidth().height(40.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            border = BorderStroke(width = 0.40.dp, color = DBrown)
+            border = BorderStroke(width = 0.40.dp, color = Emperor)
         ) {
-            Text(text = "Log Out", color = DBrown)
+            Text(text = "Log Out", color = Color.Black)
         }
     }
 }
@@ -123,7 +111,7 @@ fun SettingsSection(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = Brown, thickness = 0.5.dp)
+        HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = Color.Black, thickness = 0.5.dp)
         Text(
             text = title,
             style = MaterialTheme.typography.headlineSmall
@@ -148,9 +136,9 @@ fun SettingsToggleItem(
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedBorderColor = Color.Transparent,
-                checkedTrackColor = DBrown,
-                uncheckedBorderColor = DBrown,
-                uncheckedThumbColor = DBrown,
+                checkedTrackColor = Emperor,
+                uncheckedBorderColor = Emperor,
+                uncheckedThumbColor = Emperor,
                 uncheckedTrackColor = Color.Transparent
             )
         )
