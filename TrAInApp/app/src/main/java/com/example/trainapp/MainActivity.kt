@@ -53,7 +53,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.trainapp.ui.theme.DBrown
 import com.example.trainapp.ui.theme.Emperor
 import com.example.trainapp.ui.theme.Swirl
 import com.example.trainapp.ui.theme.TrAInAppTheme
@@ -95,7 +94,7 @@ fun Navigation(navController: NavController) {
         drawerContent = {
             ModalDrawerSheet {
                 Box(modifier = Modifier
-                    .background(DBrown)
+                    .background(Emperor)
                     .fillMaxWidth()
                     .height(150.dp)) {
                     Text(text = "")
@@ -241,7 +240,7 @@ fun Navigation(navController: NavController) {
 
                 TopAppBar(title = { Text(text = "trAIn") },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = DBrown,
+                        containerColor = Emperor,
                         titleContentColor = Swirl,
                         navigationIconContentColor = Swirl,
                         actionIconContentColor = Swirl
@@ -269,7 +268,7 @@ fun Navigation(navController: NavController) {
                 )
             },
             bottomBar = {
-                BottomAppBar(containerColor = DBrown) {
+                BottomAppBar(containerColor = Emperor) {
                     // Home
                     IconButton(onClick = {
                         selected.value = Icons.Default.Home
