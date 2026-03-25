@@ -43,9 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.trainapp.ui.theme.Brown
-import com.example.trainapp.ui.theme.DBrown
+import com.example.trainapp.ui.theme.Emperor
 import com.example.trainapp.ui.theme.Swirl
 import com.example.trainapp.ui.theme.TrAInAppTheme
 
@@ -54,7 +52,7 @@ enum class ProfileMode { READ, EDIT }
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun Profile() {
-var mode by remember { mutableStateOf(ProfileMode.READ) }
+    var mode by remember { mutableStateOf(ProfileMode.READ) }
     var name by remember { mutableStateOf("John Smith") }
     var email by remember { mutableStateOf("johnsmith@example.com") }
     var age by remember { mutableStateOf("25") }
@@ -63,6 +61,11 @@ var mode by remember { mutableStateOf(ProfileMode.READ) }
     var pronouns by remember { mutableStateOf("He/Him/His") }
     var goals by remember { mutableStateOf("Become physically fit and healthy") }
     var bio by remember { mutableStateOf("Fitness enthusiast.") }
+    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? -> profileImageUri = uri }
 
     when (mode) {
         ProfileMode.READ -> ProfileReadOnly(
@@ -74,6 +77,7 @@ var mode by remember { mutableStateOf(ProfileMode.READ) }
             pronouns = pronouns,
             goals = goals,
             bio = bio,
+            profileImageUri = profileImageUri,
             onEdit = { mode = ProfileMode.EDIT }
         )
 
@@ -86,6 +90,8 @@ var mode by remember { mutableStateOf(ProfileMode.READ) }
             pronouns = pronouns,
             goals = goals,
             bio = bio,
+            profileImageUri = profileImageUri,
+            onImageClick = { launcher.launch("image/*") },
             onNameChange = { name = it },
             onEmailChange = { email = it },
             onAgeChange = { age = it},
@@ -110,6 +116,8 @@ fun ProfileEdit(
     pronouns: String,
     goals: String,
     bio: String,
+    profileImageUri: Uri?,
+    onImageClick: () -> Unit,
     onNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onAgeChange: (String) -> Unit,
@@ -147,23 +155,29 @@ fun ProfileEdit(
             )
         }
 
-        Text(text = "Profile", style = MaterialTheme.typography.titleSmall, fontSize = 30.sp, color = DBrown)
-        Spacer(modifier = Modifier.height(8.dp))
-        // Profile Icon/Image placeholder
+        // Profile Icon/Image Selection from gallery
         Box(
             modifier = Modifier
                 .size(120.dp)
                 .clip(CircleShape)
-                .border(width = 4.dp, color = Brown, shape = CircleShape)
+                .border(width = 4.dp, color = Emperor, shape = CircleShape)
                 .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Profile Icon",
-                tint = Color.DarkGray,
-                modifier = Modifier.size(80.dp)
-            )
+           if (profileImageUri != null) {
+                AsyncImage(
+                    model = profileImageUri,
+                    contentDescription = "Profile Image",
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Profile Icon",
+                    tint = Color.DarkGray,
+                    modifier = Modifier.size(80.dp)
+                )
+            } 
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -259,7 +273,7 @@ fun ProfileEdit(
         // Save Button
         Button(onClick = {Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()},
             colors = ButtonDefaults.buttonColors(
-                containerColor = DBrown, // background color
+                containerColor = Emperor, // background color
                 contentColor = Color.White // icon text color
             )
         ) {
@@ -279,6 +293,7 @@ fun ProfileReadOnly(
     pronouns: String,
     goals: String,
     bio: String,
+    profileImageUri: Uri?,
     onEdit: () -> Unit
 ) {
     Column(
@@ -305,7 +320,7 @@ fun ProfileReadOnly(
             modifier = Modifier
                 .size(120.dp)
                 .clip(CircleShape)
-                .border(width = 4.dp, color = Brown, shape = CircleShape)
+                .border(width = 4.dp, color = Emperor, shape = CircleShape)
                 .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
