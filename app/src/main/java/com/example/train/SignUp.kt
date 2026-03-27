@@ -9,12 +9,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SignUpScreen(onSignUpSuccess: () -> Unit) {
+fun SignUpScreen(onSignUpSuccess: (String) -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isSubmitting by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -25,7 +28,9 @@ fun SignUpScreen(onSignUpSuccess: () -> Unit) {
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isSubmitting,
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -35,16 +40,36 @@ fun SignUpScreen(onSignUpSuccess: () -> Unit) {
             onValueChange = { password = it },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isSubmitting,
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = { onSignUpSuccess() },
-            modifier = Modifier.fillMaxWidth().height(50.dp)
+            onClick = {
+                if (email.isNotBlank() && password.isNotBlank()) {
+                    isSubmitting = true
+                    // Simulate a network delay or Firebase call
+                    // Passing email as the userId for the survey context
+                    onSignUpSuccess(email)
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            enabled = !isSubmitting && email.isNotBlank() && password.isNotBlank()
         ) {
-            Text("Sign Up")
+            if (isSubmitting) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text("Sign Up")
+            }
         }
     }
 }

@@ -1,33 +1,40 @@
 package com.example.train
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.unit.*
+import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.*
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.*
+import com.example.train.ui.theme.*
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    MainNavigationWrapper()
-                }
+            TrAInAppTheme {
+                TrAInNavigationWrapper()
             }
         }
     }
@@ -35,174 +42,176 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainNavigationWrapper() {
+fun TrAInNavigationWrapper() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
-
-    // Track current route to hide bars on Sign-Up page
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val userName = "John"
+    val context = LocalContext.current
 
-    // Only enable the drawer gesture if NOT on the signup page
+    // Routes that should NOT show the TopBar or BottomBar
+    val authRoutes = listOf(Screens.SignUp.screen, "survey/{userId}")
+
+    var pendingRoute by remember { mutableStateOf<String?>(null) }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            pendingRoute?.let { route -> navController.navigate(route) }
+        } else {
+            android.widget.Toast.makeText(context, "Camera permission required", android.widget.Toast.LENGTH_SHORT).show()
+        }
+        pendingRoute = null
+    }
+
+    val navigateToWorkout: (String) -> Unit = { route ->
+        val permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            navController.navigate(route)
+        } else {
+            pendingRoute = route
+            permissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = currentRoute != "signup",
+        gesturesEnabled = currentRoute !in authRoutes,
         drawerContent = {
-            if (currentRoute != "signup") {
-                ModalDrawerSheet {
-                    DrawerContent(navController) {
-                        scope.launch { drawerState.close() }
-                    }
-                }
+            ModalDrawerSheet(drawerContainerColor = OffWhite) {
+                TrAInDrawerContent(navController = navController) { scope.launch { drawerState.close() } }
             }
         }
     ) {
         Scaffold(
+            containerColor = OffWhite,
             topBar = {
-                // Hide Top Bar on Sign-Up
-                if (currentRoute != "signup") {
-                    TopAppBar(
-                        title = { Text("trAIn", fontWeight = FontWeight.Bold) },
+                if (currentRoute !in authRoutes) {
+                    CenterAlignedTopAppBar(
+                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = OffWhite),
+                        title = { Text("trAIn", fontWeight = FontWeight.ExtraBold) },
                         navigationIcon = {
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                Icon(Icons.Rounded.Menu, contentDescription = "Menu")
                             }
                         },
                         actions = {
-                            IconButton(onClick = { navController.navigate("profile") }) {
-                                Icon(Icons.Default.Person, contentDescription = "Profile")
+                            IconButton(onClick = { navController.navigate(Screens.Profile.screen) }) {
+                                Icon(Icons.Rounded.AccountCircle, contentDescription = "Profile")
                             }
                         }
                     )
                 }
             },
             bottomBar = {
-                // Hide Bottom Bar on Sign-Up
-                if (currentRoute != "signup") {
-                    BottomNavigationBar(navController)
-                }
+                if (currentRoute !in authRoutes) TrAInBottomBar(navController)
             }
-        ) { padding ->
+        ) { paddingValues ->
             NavHost(
                 navController = navController,
-                startDestination = "signup", // App now starts here
-                modifier = Modifier.padding(padding)
+                startDestination = Screens.SignUp.screen,
+                modifier = Modifier.padding(paddingValues)
             ) {
-                composable("signup") {
-                    SignUpScreen(onSignUpSuccess = {
-                        navController.navigate("home") {
-                            // Clear signup from history so back button exits app
-                            popUpTo("signup") { inclusive = true }
+                // SIGN UP -> SURVEY
+                composable(Screens.SignUp.screen) {
+                    SignUpScreen { userId ->
+                        navController.navigate("survey/$userId") {
+                            popUpTo(Screens.SignUp.screen) { inclusive = true }
                         }
-                    })
-                }
-                composable("home") { HomePageContent(userName, navController) }
-                composable("profile") { BlankPage("Profile Page") }
-                composable("workouts") { BlankPage("Workouts Page") }
-                composable("progress") { BlankPage("Progress Page") }
-                composable("favorites") { BlankPage("Favorites Page") }
-                composable("time") { BlankPage("Time Spent Page") }
-                composable("notifications") { BlankPage("Notifications Page") }
-                composable("settings") { BlankPage("Settings Page") }
-                composable("about") { AboutUs() }
-                composable("search") { BlankPage("Search Page") }
-                composable("logout") {
-                    // Navigate back to signup and clear everything
-                    navController.navigate("signup") {
-                        popUpTo(0) { inclusive = true }
                     }
                 }
+
+                // SURVEY -> HOME
+                composable(route = "survey/{userId}") { backStackEntry ->
+                    val userId = backStackEntry.arguments?.getString("userId") ?: ""
+                    SurveyScreenRoute(
+                        userId = userId,
+                        onDone = {
+                            navController.navigate(Screens.Home.screen) {
+                                // This ensures the user can't go back to the survey after finishing
+                                popUpTo("survey/{userId}") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                composable(Screens.Home.screen) { Home(navController) }
+                composable(Screens.Workouts.screen) {
+                    Workouts(onWorkoutSelected = { route -> navigateToWorkout(route) })
+                }
+                composable(Screens.Profile.screen) { Profile() }
+                composable(Screens.Notifications.screen) { Notifications() }
+                composable(Screens.Goals.screen) { Goals() }
+                composable(Screens.AboutUs.screen) { AboutUs() }
+                composable(Screens.Settings.screen) { Settings() }
+                composable(Screens.Search.screen) { Search() }
+                composable(Screens.Favorites.screen) { Favorites() }
+                composable(Screens.Help.screen) { Help() }
+                composable(Screens.Progress.screen) {
+                    Progress(reps = 30, accuracy = 92, timeSpent = "08:14",
+                        onExit = { navController.navigate(Screens.Home.screen) },
+                        onRestart = { navigateToWorkout(Screens.Workouts.screen) }
+                    )
+                }
+                composable(Screens.PushUp.screen) { Push_up(onPushUpClick = { navController.navigate(Screens.Search.screen) }) }
+                composable(Screens.Squats.screen) { Squats() }
+                composable(Screens.Lunges.screen) { Lunges() }
             }
         }
     }
 }
 
 @Composable
-fun HomePageContent(userName: String, navController: NavHostController) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Hello, $userName", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ImageCarousel() // Your smooth sliding carousel
-
-        Spacer(modifier = Modifier.height(24.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            Button(onClick = { navController.navigate("progress") }, modifier = Modifier.weight(1f)) { Text("Progress", fontSize = 11.sp) }
-            Button(onClick = { navController.navigate("favorites") }, modifier = Modifier.weight(1f)) { Text("Favorites", fontSize = 11.sp) }
-            Button(onClick = { navController.navigate("time") }, modifier = Modifier.weight(1f)) { Text("Time", fontSize = 11.sp) }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = { navController.navigate("workouts") },
-            modifier = Modifier.fillMaxWidth().height(56.dp)
-        ) {
-            Icon(Icons.Default.PlayArrow, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("START WORKOUT")
-        }
-    }
-}
-
-@Composable
-fun BottomNavigationBar(navController: NavHostController) {
+fun TrAInBottomBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-
-    NavigationBar {
-        val items = listOf(
-            Triple("home", Icons.Default.Home, "Home"),
-            Triple("search", Icons.Default.Search, "Search"),
-            Triple("notifications", Icons.Default.Notifications, "Alerts"),
-            Triple("progress", Icons.Default.FitnessCenter, "Stats"),
-            Triple("settings", Icons.Default.Settings, "Settings")
-        )
-        items.forEach { (route, icon, label) ->
+    val items = listOf(
+        Triple("Home", Screens.Home.screen, Icons.Default.Home),
+        Triple("Search", Screens.Search.screen, Icons.Default.Search),
+        Triple("Notifications", Screens.Notifications.screen, Icons.Default.Notifications),
+        Triple("Profile", Screens.Profile.screen, Icons.Default.Person),
+        Triple("Settings", Screens.Settings.screen, Icons.Default.Settings)
+    )
+    NavigationBar(containerColor = DeepCoffee, contentColor = DeepNavy) {
+        items.forEach { (label, route, icon) ->
+            val isSelected = currentRoute == route
             NavigationBarItem(
-                icon = { Icon(icon, label) },
-                label = { Text(label) },
-                selected = currentRoute == route,
+                selected = isSelected,
                 onClick = {
                     if (currentRoute != route) {
                         navController.navigate(route) {
-                            popUpTo("home") { saveState = true }
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
                     }
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun DrawerContent(navController: NavHostController, onDestinationClicked: () -> Unit) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Navigation", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(16.dp))
-        HorizontalDivider()
-        val options = listOf("Profile" to "profile", "Workouts" to "workouts", "About Us" to "about", "Logout" to "logout")
-        options.forEach { (title, route) ->
-            NavigationDrawerItem(
-                label = { Text(title) },
-                selected = false,
-                onClick = {
-                    navController.navigate(route)
-                    onDestinationClicked()
                 },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                icon = { Icon(icon, contentDescription = label, tint = if (isSelected) AccentGold else Color.White) },
+                label = null,
+                colors = NavigationBarItemDefaults.colors(indicatorColor = Color.Transparent)
             )
         }
     }
 }
 
 @Composable
-fun BlankPage(title: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = title, style = MaterialTheme.typography.headlineMedium)
+fun TrAInDrawerContent(navController: NavHostController, onClose: () -> Unit) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Text("trAIn Menu", color = CharcoalBlue, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = CharcoalBlue.copy(alpha = 0.2f))
+        val menuItems = listOf("Home" to Screens.Home.screen, "Profile" to Screens.Profile.screen, "Goals" to Screens.Goals.screen, "Workouts" to Screens.Workouts.screen, "Settings" to Screens.Settings.screen)
+        menuItems.forEach { (title, route) ->
+            val isSelected = currentRoute == route
+            NavigationDrawerItem(
+                label = { Text(title, color = if (isSelected) Color.White else CharcoalBlue) },
+                selected = isSelected,
+                onClick = { navController.navigate(route); onClose() },
+                colors = NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.Transparent, selectedContainerColor = SteelBlue),
+                shape = RoundedCornerShape(12.dp)
+            )
+        }
     }
 }

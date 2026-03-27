@@ -1,4 +1,4 @@
-package com.example.myapplication1.ui.theme
+package com.example.train.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -9,43 +9,41 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.graphics.Color
+import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    //background = Emperor,
-    //primary = Emperor,
-    //secondary = Swirl,
-    //tertiary = Edward
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = SteelBlue,
+    secondary = DeepCoffee,
+    tertiary = AccentGold,
+    background = OffWhite,
+    surface = CharcoalBlue,
+    onPrimary = Color.White,
+    onBackground = CharcoalBlue,
+    onSurface = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
-    //background = Emperor,
-    //primary = Emperor,
-    //secondary = Swirl,
-    //tertiary = Edward
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = CharcoalBlue,
+    secondary = SteelBlue,
+    tertiary = AccentGold,
+    background = OffWhite,
+    surface = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    onBackground = CharcoalBlue,
+    onSurface = CharcoalBlue
 )
 
 @Composable
-fun MyApplication1Theme(
+fun TrAInAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Set to false if you want to force your brand colors over Android's dynamic colors
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -53,14 +51,23 @@ fun MyApplication1Theme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
 
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            // This makes the status bar (top clock/battery) match your Beige background
+            window.statusBarColor = colorScheme.background.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = Typography, // Uses the Typography.kt definitions
         content = content
     )
 }
