@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="getAverageAngle()" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-04-15T19:16:23.863Z" hostname="SALTY" time="0.001">
+  <properties/>
+  <testcase name="returns average of two different angles" classname="com.android.example.camx.PoseAnalyzerTest$GetAverageAngle" time="0.0"/>
+  <testcase name="returns average of two equal angles" classname="com.android.example.camx.PoseAnalyzerTest$GetAverageAngle" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
