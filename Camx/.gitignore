@@ -1,0 +1,21 @@
+# Build output — never commit these
+/app/build/
+/build/
+
+# Gradle cache — machine specific
+/.gradle/
+/gradle/wrapper/gradle-wrapper.jar
+
+# Local machine config — contains your SDK path, never share this
+local.properties
+
+# Android Studio / IntelliJ project files
+*.iml
+/.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test outputs — generated automatically, not source code
+/app/src/test/java/SimpleFrameAnalyzerTest.kt
