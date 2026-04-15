@@ -4,6 +4,7 @@ package com.android.example.camx.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -29,6 +30,9 @@ public final class ActivityMainBinding implements ViewBinding {
   public final TextView coachText;
 
   @NonNull
+  public final Button exerciseToggleButton;
+
+  @NonNull
   public final PoseOverlay poseOverlay;
 
   @NonNull
@@ -36,10 +40,12 @@ public final class ActivityMainBinding implements ViewBinding {
 
   private ActivityMainBinding(@NonNull FrameLayout rootView,
       @NonNull FloatingActionButton cameraSwitchButton, @NonNull TextView coachText,
-      @NonNull PoseOverlay poseOverlay, @NonNull PreviewView viewFinder) {
+      @NonNull Button exerciseToggleButton, @NonNull PoseOverlay poseOverlay,
+      @NonNull PreviewView viewFinder) {
     this.rootView = rootView;
     this.cameraSwitchButton = cameraSwitchButton;
     this.coachText = coachText;
+    this.exerciseToggleButton = exerciseToggleButton;
     this.poseOverlay = poseOverlay;
     this.viewFinder = viewFinder;
   }
@@ -83,6 +89,12 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.exerciseToggleButton;
+      Button exerciseToggleButton = ViewBindings.findChildViewById(rootView, id);
+      if (exerciseToggleButton == null) {
+        break missingId;
+      }
+
       id = R.id.poseOverlay;
       PoseOverlay poseOverlay = ViewBindings.findChildViewById(rootView, id);
       if (poseOverlay == null) {
@@ -96,7 +108,7 @@ public final class ActivityMainBinding implements ViewBinding {
       }
 
       return new ActivityMainBinding((FrameLayout) rootView, cameraSwitchButton, coachText,
-          poseOverlay, viewFinder);
+          exerciseToggleButton, poseOverlay, viewFinder);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

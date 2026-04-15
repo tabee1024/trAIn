@@ -8,21 +8,20 @@
     tools:context=".MainActivity">
 
     <!-- Camera Preview -->
-    <!-- ✅ Fixed: fitCenter ensures full body is visible without cropping -->
     <androidx.camera.view.PreviewView
         android:id="@+id/viewFinder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:scaleType="fitCenter" />
 
-    <!-- Pose Overlay -->
+    <!-- Pose Skeleton Overlay -->
     <com.android.example.camx.PoseOverlay
         android:id="@+id/poseOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent" />
 
-    <!-- Camera Switch Button -->
+    <!-- Top-right: Camera Switch Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/cameraSwitchButton"
         android:layout_width="wrap_content"
@@ -34,21 +33,43 @@
         app:backgroundTint="#88000000"
         app:tint="@android:color/white" />
 
-    <!-- Status Text -->
-    <TextView
-        android:id="@+id/coachText"
+    <!-- Top-left: Exercise Toggle Button -->
+    <!-- Cycles through Push-Ups → Squats → (future exercises) on each tap -->
+    <Button
+        android:id="@+id/exerciseToggleButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="32dp"
-        android:background="#CC000000"
+        android:layout_gravity="top|start"
+        android:layout_margin="16dp"
+        android:text="Push-Ups"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:backgroundTint="#88000000"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:paddingTop="8dp"
-        android:paddingBottom="8dp"
+        android:paddingBottom="8dp" />
+
+    <!-- Bottom center: Coach Status Text -->
+    <!-- Shows exercise name, rep count, phase, and form feedback -->
+    <TextView
+        android:id="@+id/coachText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="#CC000000"
+        android:gravity="center"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:text="Initializing..."
         android:textColor="#FFFFFF"
-        android:textSize="16sp"
+        android:textSize="15sp"
         android:textStyle="bold" />
 
 </FrameLayout>

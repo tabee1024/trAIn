@@ -8,61 +8,39 @@ import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
 
 /**
- * A transparent [View] that draws the MediaPipe pose skeleton on top of the camera preview.
+ * A transparent [View] that draws the MediaPipe pose skeleton and real-time
+ * coaching data on top of the camera preview.
  *
- * This view is placed directly over the [androidx.camera.view.PreviewView] in the layout,
- * with a transparent background so the camera feed shows through. It translates normalized
- * MediaPipe landmark coordinates (in the range 0.0–1.0) into pixel coordinates on screen,
- * accounting for the letterbox or pillarbox black bars introduced by the PreviewView's
- * `fitCenter` scale type.
+ * Renders two layers:
+ * 1. **Skeleton** — yellow joint circles and white connection lines for the
+ *    detected pose landmarks.
+ * 2. **Coach overlay** — the current elbow angle displayed near the elbow
+ *    landmarks, helping the user see their depth in real time.
  *
- * The skeleton consists of:
- * - **Yellow circles** at each detected landmark joint
- * - **White lines** connecting joints according to the MediaPipe 33-point body model
+ * Landmark coordinates from MediaPipe are normalized (0.0–1.0). This view
+ * maps them into actual screen pixel positions using [getImageRect], which
+ * accounts for the letterbox/pillarbox black bars introduced by the
+ * [androidx.camera.view.PreviewView] `fitCenter` scale type.
  *
- * Landmarks with a [NormalizedLandmark.visibility] score below [MIN_VISIBILITY]
- * are skipped, preventing jittery or incorrect points being drawn for body parts
- * that are occluded or outside the frame.
+ * Landmarks with [NormalizedLandmark.visibility] below [MIN_VISIBILITY] are
+ * skipped to avoid drawing phantom joints for occluded body parts.
  *
- * MediaPipe 33 landmark indices reference:
- * https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker
- *
- * Usage:
- * ```kotlin
- * // From PoseLandmarkerListener.onResults (must be on main thread):
- * poseOverlay.setResults(result, imageWidth, imageHeight)
- *
- * // When no pose is present:
- * poseOverlay.clear()
- * ```
- *
- * @see PoseLandmarkerHelper
- * @see MainActivity
+ * @see PushUpCounter
+ * @see PoseAnalyzer
  */
 class PoseOverlay(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
 
-    /**
-     * The most recent pose detection result to render.
-     * `null` when no result has been set or after [clear] is called.
-     */
     private var results: PoseLandmarkerResult? = null
-
-    /**
-     * Width of the image that produced the current [results], in pixels.
-     * Used together with [imageHeight] to compute [getImageRect].
-     */
     private var imageWidth = 1
-
-    /**
-     * Height of the image that produced the current [results], in pixels.
-     */
     private var imageHeight = 1
 
     /**
-     * Paint used to draw landmark joint circles.
-     *
-     * Yellow fill, 8px radius, anti-aliased for smooth rendering.
+     * The current elbow angle (degrees) to display near the elbow landmarks.
+     * Set via [setCoachData]. Null means no angle label is drawn.
      */
+    private var elbowAngle: Double? = null
+
+    /** Yellow fill paint for landmark joint circles. Anti-aliased. */
     private val pointPaint = Paint().apply {
         color = Color.YELLOW
         strokeWidth = 12f
@@ -70,11 +48,7 @@ class PoseOverlay(context: Context, attrs: AttributeSet? = null) : View(context,
         isAntiAlias = true
     }
 
-    /**
-     * Paint used to draw skeleton connection lines between joints.
-     *
-     * White stroke, 6px width, anti-aliased for smooth rendering.
-     */
+    /** White stroke paint for skeleton connection lines. Anti-aliased. */
     private val linePaint = Paint().apply {
         color = Color.WHITE
         strokeWidth = 6f
@@ -83,62 +57,54 @@ class PoseOverlay(context: Context, attrs: AttributeSet? = null) : View(context,
     }
 
     /**
-     * Pairs of landmark indices defining the skeleton connections to draw.
+     * Paint for the elbow angle text label drawn near the elbow joints.
      *
-     * Each pair `(a, b)` draws a line from landmark `a` to landmark `b`.
-     * Indices correspond to the MediaPipe 33-point body model:
+     * Cyan color provides high contrast against both the white skeleton lines
+     * and the dark camera background.
+     */
+    private val anglePaint = Paint().apply {
+        color = Color.CYAN
+        textSize = 48f
+        isAntiAlias = true
+        typeface = Typeface.DEFAULT_BOLD
+    }
+
+    /**
+     * Pairs of landmark indices defining the body skeleton connections.
      *
-     * - 11/12 = left/right shoulder
-     * - 13/14 = left/right elbow
-     * - 15/16 = left/right wrist
-     * - 23/24 = left/right hip
-     * - 25/26 = left/right knee
-     * - 27/28 = left/right ankle
-     * - 29/30 = left/right heel
-     * - 31/32 = left/right foot index
+     * Covers the torso, arms, and legs. Head/face landmarks (0–10) are omitted
+     * for a cleaner body-only overlay. For push-ups the arm connections
+     * (11–16) are the most important for feedback.
      *
-     * Note: Head, face, and finger landmarks (0–10) are intentionally excluded
-     * for a cleaner body-only skeleton overlay.
+     * Index reference:
+     * - 11/12 = shoulders, 13/14 = elbows, 15/16 = wrists
+     * - 23/24 = hips, 25/26 = knees, 27/28 = ankles
+     * - 29/30 = heels, 31/32 = foot index
      */
     private val POSE_CONNECTIONS = listOf(
-        Pair(11, 12), // shoulder to shoulder
-        Pair(11, 13), // left shoulder to left elbow
-        Pair(13, 15), // left elbow to left wrist
-        Pair(12, 14), // right shoulder to right elbow
-        Pair(14, 16), // right elbow to right wrist
-        Pair(11, 23), // left shoulder to left hip
-        Pair(12, 24), // right shoulder to right hip
-        Pair(23, 24), // hip to hip
-        Pair(23, 25), // left hip to left knee
-        Pair(24, 26), // right hip to right knee
-        Pair(25, 27), // left knee to left ankle
-        Pair(26, 28), // right knee to right ankle
-        Pair(27, 29), // left ankle to left heel
-        Pair(28, 30), // right ankle to right heel
-        Pair(29, 31), // left heel to left foot index
-        Pair(30, 32)  // right heel to right foot index
+        Pair(11, 12), Pair(11, 13), Pair(13, 15),
+        Pair(12, 14), Pair(14, 16),
+        Pair(11, 23), Pair(12, 24), Pair(23, 24),
+        Pair(23, 25), Pair(24, 26),
+        Pair(25, 27), Pair(26, 28),
+        Pair(27, 29), Pair(28, 30),
+        Pair(29, 31), Pair(30, 32)
     )
 
     /**
-     * Minimum visibility score (0.0–1.0) required to draw a landmark or connection.
-     *
-     * MediaPipe assigns each landmark a visibility score estimating whether
-     * the point is within the frame and unoccluded. Points below this threshold
-     * are skipped to avoid drawing phantom joints for body parts that are not
-     * clearly visible. 0.5 means at least 50% confidence the point is visible.
+     * Minimum visibility confidence (0.0–1.0) required to render a landmark
+     * or connection. Filters out MediaPipe detections with low confidence,
+     * such as body parts outside the frame or occluded by the floor.
      */
     private val MIN_VISIBILITY = 0.5f
 
     /**
-     * Updates the overlay with new pose detection results and triggers a redraw.
+     * Updates the pose landmarks to render and triggers a redraw.
      *
-     * Must be called on the main thread. Typically invoked from
-     * [MainActivity.onResults] after marshalling from the MediaPipe thread.
+     * Must be called on the main thread.
      *
-     * @param result    The pose detection result from MediaPipe containing
-     *                  normalized landmark positions.
-     * @param imgWidth  Width of the image that was analyzed, in pixels.
-     *                  Must match the bitmap passed to [PoseLandmarkerHelper.detectLiveStream].
+     * @param result    The [PoseLandmarkerResult] from the current frame.
+     * @param imgWidth  Width of the analyzed image in pixels.
      * @param imgHeight Height of the analyzed image in pixels.
      */
     fun setResults(result: PoseLandmarkerResult, imgWidth: Int, imgHeight: Int) {
@@ -149,30 +115,39 @@ class PoseOverlay(context: Context, attrs: AttributeSet? = null) : View(context,
     }
 
     /**
-     * Clears the current results and removes the skeleton from the screen.
+     * Updates the coaching data overlay and triggers a redraw.
      *
-     * Call this when pose detection stops or no pose is present to avoid
-     * leaving a stale skeleton frozen on screen.
+     * Called each frame by [MainActivity.onResults] with the latest elbow
+     * angle from [PushUpCounter]. The angle is drawn as a text label near
+     * the midpoint of the elbow landmarks on screen.
+     *
+     * @param angle The current average elbow angle in degrees to display.
      */
-    fun clear() {
-        results = null
+    fun setCoachData(angle: Double) {
+        elbowAngle = angle
         invalidate()
     }
 
     /**
-     * Computes the [RectF] representing the area within this view that the
-     * camera preview image actually occupies, accounting for `fitCenter` scaling.
+     * Clears all results and coach data, removing everything from the screen.
+     * Call when pose detection is stopped or the session resets.
+     */
+    fun clear() {
+        results = null
+        elbowAngle = null
+        invalidate()
+    }
+
+    /**
+     * Computes the [RectF] of the actual camera image area within this view,
+     * matching the `fitCenter` scale type of [androidx.camera.view.PreviewView].
      *
-     * The [androidx.camera.view.PreviewView] uses `fitCenter`, which scales the
-     * camera image to fit entirely within the view while preserving aspect ratio.
-     * This means black bars may appear on the sides (pillarbox) or top/bottom
-     * (letterbox) when the image and view aspect ratios differ.
+     * `fitCenter` scales the image to fit entirely within the view while
+     * preserving aspect ratio, leaving black bars where the aspect ratios
+     * differ. Landmarks must be mapped into this rect (not the full view)
+     * to align correctly with the visible preview.
      *
-     * Landmark coordinates are normalized to the image's own dimensions (0.0–1.0),
-     * so they must be mapped into this rect — not the full view dimensions — to
-     * correctly overlay the visible preview image.
-     *
-     * @return A [RectF] in view-pixel coordinates describing the image's drawn area.
+     * @return A [RectF] in view-pixel coordinates for the rendered image area.
      */
     private fun getImageRect(): RectF {
         val viewW = width.toFloat()
@@ -181,34 +156,30 @@ class PoseOverlay(context: Context, attrs: AttributeSet? = null) : View(context,
         val viewAspect = viewW / viewH
 
         return if (imageAspect > viewAspect) {
-            // Image is wider than the view → letterbox (black bars top & bottom)
-            val scaledHeight = viewW / imageAspect
-            val offsetY = (viewH - scaledHeight) / 2f
-            RectF(0f, offsetY, viewW, offsetY + scaledHeight)
+            // Letterbox — black bars top and bottom
+            val scaledH = viewW / imageAspect
+            val offsetY = (viewH - scaledH) / 2f
+            RectF(0f, offsetY, viewW, offsetY + scaledH)
         } else {
-            // Image is taller than the view → pillarbox (black bars left & right)
-            val scaledWidth = viewH * imageAspect
-            val offsetX = (viewW - scaledWidth) / 2f
-            RectF(offsetX, 0f, offsetX + scaledWidth, viewH)
+            // Pillarbox — black bars left and right
+            val scaledW = viewH * imageAspect
+            val offsetX = (viewW - scaledW) / 2f
+            RectF(offsetX, 0f, offsetX + scaledW, viewH)
         }
     }
 
     /**
-     * Renders the pose skeleton onto the canvas.
+     * Renders the skeleton and elbow angle label onto the canvas.
      *
-     * Drawing order:
-     * 1. Skeleton connection lines (drawn first so joints appear on top)
-     * 2. Landmark joint circles
+     * Draw order:
+     * 1. White skeleton connection lines (drawn first, behind joints)
+     * 2. Yellow landmark joint circles (drawn on top of lines)
+     * 3. Cyan elbow angle text label (drawn last, always on top)
      *
-     * Both steps skip any landmark whose visibility score is below [MIN_VISIBILITY].
-     * A connection line is only drawn if **both** of its endpoint landmarks
-     * meet the visibility threshold.
+     * The elbow angle label is positioned at the midpoint between the left
+     * and right elbow landmarks (indices 13 and 14).
      *
-     * Landmark coordinates are mapped from normalized image space (0.0–1.0) into
-     * screen pixel space using [getImageRect], ensuring the skeleton aligns
-     * precisely with the camera preview regardless of letterboxing.
-     *
-     * @param canvas The canvas to draw the skeleton on.
+     * @param canvas The [Canvas] provided by the Android View system.
      */
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -218,28 +189,40 @@ class PoseOverlay(context: Context, attrs: AttributeSet? = null) : View(context,
         val landmarks = result.landmarks()[0]
         val rect = getImageRect()
 
-        // Helper lambdas to convert normalized landmark coords to screen pixels.
         fun lmX(lm: NormalizedLandmark) = rect.left + lm.x() * rect.width()
-        fun lmY(lm: NormalizedLandmark) = rect.top + lm.y() * rect.height()
+        fun lmY(lm: NormalizedLandmark) = rect.top  + lm.y() * rect.height()
 
-        // Pass 1: Draw skeleton connection lines.
+        // Pass 1: Skeleton connection lines
         for ((start, end) in POSE_CONNECTIONS) {
             if (start < landmarks.size && end < landmarks.size) {
-                val startLm = landmarks[start]
-                val endLm = landmarks[end]
-
-                // Skip connection if either endpoint is not confidently visible.
-                if (startLm.visibility().orElse(0f) < MIN_VISIBILITY ||
-                    endLm.visibility().orElse(0f) < MIN_VISIBILITY) continue
-
-                canvas.drawLine(lmX(startLm), lmY(startLm), lmX(endLm), lmY(endLm), linePaint)
+                val s = landmarks[start]
+                val e = landmarks[end]
+                if (s.visibility().orElse(0f) < MIN_VISIBILITY ||
+                    e.visibility().orElse(0f) < MIN_VISIBILITY) continue
+                canvas.drawLine(lmX(s), lmY(s), lmX(e), lmY(e), linePaint)
             }
         }
 
-        // Pass 2: Draw joint circles on top of connection lines.
+        // Pass 2: Joint circles
         for (landmark in landmarks) {
             if (landmark.visibility().orElse(0f) < MIN_VISIBILITY) continue
             canvas.drawCircle(lmX(landmark), lmY(landmark), 8f, pointPaint)
+        }
+
+        // Pass 3: Elbow angle label
+        // Draw the angle at the midpoint between both elbows so it's visible
+        // regardless of which side the person faces the camera.
+        val angle = elbowAngle ?: return
+        if (landmarks.size > 14) {
+            val leftElbow  = landmarks[13]
+            val rightElbow = landmarks[14]
+            if (leftElbow.visibility().orElse(0f) >= MIN_VISIBILITY ||
+                rightElbow.visibility().orElse(0f) >= MIN_VISIBILITY) {
+
+                val midX = (lmX(leftElbow) + lmX(rightElbow)) / 2f
+                val midY = (lmY(leftElbow) + lmY(rightElbow)) / 2f
+                canvas.drawText("${angle.toInt()}°", midX, midY - 20f, anglePaint)
+            }
         }
     }
 }

@@ -4,7 +4,7 @@
             "outputFile": "com.android.example.camx.app-mergeDebugResources-38:/values-v35/values-v35.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\legen\\.gradle\\caches\\8.13\\transforms\\38ebb33489063e024fecb3caf7b02b19\\transformed\\material-1.13.0\\res\\values-v35\\values-v35.xml",
+                    "source": "C:\\Users\\legen\\.gradle\\caches\\9.2.1\\transforms\\5b9270bd7d84952aef7f09659793609c\\workspace\\transformed\\material-1.13.0\\res\\values-v35\\values-v35.xml",
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",

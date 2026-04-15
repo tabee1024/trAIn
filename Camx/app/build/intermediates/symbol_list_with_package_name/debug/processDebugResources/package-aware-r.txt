@@ -3847,6 +3847,7 @@ id enterAlways
 id enterAlwaysCollapsed
 id entireSpace
 id escape
+id exerciseToggleButton
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu

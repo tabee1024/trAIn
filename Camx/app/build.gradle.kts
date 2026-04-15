@@ -36,14 +36,12 @@ android {
         jvmTarget = "11"
     }
 
-    // ✅ Fixed: Kotlin DSL syntax
-    aaptOptions {
-        noCompress("tflite", "task")
-    }
-
-    // ✅ Added: Required for ViewBinding in MainActivity
     buildFeatures {
         viewBinding = true
+    }
+
+    androidResources {
+        noCompress += listOf("tflite", "task")
     }
 }
 
@@ -61,10 +59,15 @@ dependencies {
 
     implementation("com.google.mediapipe:tasks-vision:0.10.14")
 
-    testImplementation(libs.junit)
-    testImplementation(libs.junit.jupiter)
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
+
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.0")
+
+
+    testImplementation("io.mockk:mockk:1.13.10")
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

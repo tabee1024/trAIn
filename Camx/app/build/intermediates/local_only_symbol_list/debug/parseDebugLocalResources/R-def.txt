@@ -7,6 +7,7 @@ drawable ic_launcher_background
 drawable ic_launcher_foreground
 id cameraSwitchButton
 id coachText
+id exerciseToggleButton
 id poseOverlay
 id viewFinder
 layout activity_main
