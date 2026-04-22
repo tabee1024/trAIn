@@ -21,7 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.train.ui.theme.StoneGrey
-import com.example.train.ui.theme.TrAInAppTheme
+import com.example.train.ui.theme.*
 
 @Composable
 fun Help() {
@@ -144,12 +144,4 @@ private fun SectionHeader(title: String) {
         style = MaterialTheme.typography.headlineSmall,
         modifier = Modifier.padding(vertical = 8.dp)
     )
-}
-
-@Preview
-@Composable
-fun HelpPreview() {
-    TrAInAppTheme {
-        Help()
-    }
 }
