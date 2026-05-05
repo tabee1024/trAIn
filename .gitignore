@@ -1,0 +1,24 @@
+# Gradle and Android build output
+.gradle/
+build/
+**/build/
+
+# Local machine configuration
+local.properties
+
+# Android Studio / IntelliJ local state
+.idea/
+*.iml
+
+# OS metadata
+.DS_Store
+__MACOSX/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# Keystores should be shared through a secret manager, not Git.
+*.jks
+*.keystore
