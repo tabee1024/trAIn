@@ -18,6 +18,11 @@ import kotlin.math.max
 class TrainDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
+    override fun onConfigure(db: SQLiteDatabase) {
+        super.onConfigure(db)
+        db.setForeignKeyConstraintsEnabled(true)
+    }
+
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
             """
@@ -54,7 +59,7 @@ class TrainDatabaseHelper(context: Context) :
                 duration INTEGER,
                 calories_burned INTEGER,
                 video_uri TEXT,
-                FOREIGN KEY (user_id) REFERENCES Users(user_id)
+                FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
             )
             """.trimIndent(),
         )
@@ -68,7 +73,7 @@ class TrainDatabaseHelper(context: Context) :
                 repetitions INTEGER,
                 duration INTEGER,
                 camera_mode TEXT,
-                FOREIGN KEY (session_id) REFERENCES Workout_Sessions(session_id),
+                FOREIGN KEY (session_id) REFERENCES Workout_Sessions(session_id) ON DELETE CASCADE,
                 FOREIGN KEY (exercise_id) REFERENCES Exercises(exercise_id)
             )
             """.trimIndent(),
@@ -86,7 +91,7 @@ class TrainDatabaseHelper(context: Context) :
                 correct_rep_percentage REAL,
                 feedback TEXT,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (log_id) REFERENCES Exercise_Logs(log_id)
+                FOREIGN KEY (log_id) REFERENCES Exercise_Logs(log_id) ON DELETE CASCADE
             )
             """.trimIndent(),
         )
@@ -100,7 +105,7 @@ class TrainDatabaseHelper(context: Context) :
                 total_repetitions INTEGER,
                 improvement_percentage REAL,
                 last_updated TEXT,
-                FOREIGN KEY (user_id) REFERENCES Users(user_id)
+                FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
             )
             """.trimIndent(),
         )
@@ -111,7 +116,7 @@ class TrainDatabaseHelper(context: Context) :
                 user_id INTEGER,
                 recommendation_text TEXT,
                 created_date TEXT,
-                FOREIGN KEY (user_id) REFERENCES Users(user_id)
+                FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
             )
             """.trimIndent(),
         )
@@ -540,11 +545,24 @@ class TrainDatabaseHelper(context: Context) :
     }
 
     fun deleteSession(sessionId: Int) {
-        writableDatabase.delete("Workout_Sessions", "session_id = ?", arrayOf(sessionId.toString()))
+        writableDatabase.beginTransaction()
+        try {
+            val sessionArgs = arrayOf(sessionId.toString())
+            writableDatabase.delete(
+                "AI_Analysis",
+                "log_id IN (SELECT log_id FROM Exercise_Logs WHERE session_id = ?)",
+                sessionArgs,
+            )
+            writableDatabase.delete("Exercise_Logs", "session_id = ?", sessionArgs)
+            writableDatabase.delete("Workout_Sessions", "session_id = ?", sessionArgs)
+            writableDatabase.setTransactionSuccessful()
+        } finally {
+            writableDatabase.endTransaction()
+        }
     }
 
     companion object {
         private const val DATABASE_NAME = "train_application.db"
-        private const val DATABASE_VERSION = 7
+        private const val DATABASE_VERSION = 8
     }
 }
