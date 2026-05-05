@@ -69,7 +69,7 @@ class CameraWorkoutActivity : ComponentActivity() {
         if (permissions.all { it.value }) {
             startCamera()
         } else {
-            feedbackText.text = "Camera and Audio permissions are required for recording."
+            feedbackText.text = "Camera permission is required for workout tracking."
         }
     }
 
@@ -168,9 +168,11 @@ class CameraWorkoutActivity : ComponentActivity() {
                     .build()
                 videoCapture = VideoCapture.withOutput(recorder)
 
-                // Strictly use the Front Camera (Webcam on computer/emulator)
-                val cameraSelector = CameraSelector.Builder()
+                val frontCameraSelector = CameraSelector.Builder()
                     .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+                    .build()
+                val backCameraSelector = CameraSelector.Builder()
+                    .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                     .build()
 
                 val useCaseGroup = UseCaseGroup.Builder()
@@ -180,11 +182,19 @@ class CameraWorkoutActivity : ComponentActivity() {
                     .build()
 
                 cameraProvider.unbindAll()
-                val camera = cameraProvider.bindToLifecycle(
-                    this,
-                    cameraSelector,
-                    useCaseGroup
-                )
+                val camera = try {
+                    cameraProvider.bindToLifecycle(
+                        this,
+                        frontCameraSelector,
+                        useCaseGroup
+                    )
+                } catch (frontCameraError: IllegalArgumentException) {
+                    cameraProvider.bindToLifecycle(
+                        this,
+                        backCameraSelector,
+                        useCaseGroup
+                    )
+                }
                 
                 isCameraStarted = true
                 
@@ -305,6 +315,6 @@ class CameraWorkoutActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_WORKOUT_ID = "workout_id"
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
 }
