@@ -92,15 +92,15 @@ fun ProgressScreen(
                     }
                 }
 
-                // Bodyweight Trend Card
+                // Repetition Trend Card
                 item {
                     DashboardCard(
-                        title = "Bodyweight logged per session",
-                        subtitle = "Tracks the user-entered bodyweight at each workout for long-term progress"
+                        title = "Reps logged per session",
+                        subtitle = "Tracks completed repetitions from saved workouts in the selected period"
                     ) {
                         SingleLineTrendLegend()
                         Spacer(Modifier.height(16.dp))
-                        BodyweightChart(snapshot!!.bodyweightTrend)
+                        RepetitionChart(snapshot!!.repetitionTrend)
                     }
                 }
 
@@ -238,7 +238,7 @@ fun MultiLineTrendLegend() {
 @Composable
 fun SingleLineTrendLegend() {
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        LegendItem("Logged weight (lbs)", AccentPushups)
+        LegendItem("Completed reps", AccentPushups)
         LegendItem("Trend range", AccentPushups.copy(alpha = 0.2f), isBox = true)
     }
 }
@@ -307,21 +307,21 @@ fun MultiLineChart(trends: Map<String, List<Float>>) {
 }
 
 @Composable
-fun BodyweightChart(data: List<Float>) {
+fun RepetitionChart(data: List<Float>) {
     if (data.isEmpty()) return
     
     Canvas(modifier = Modifier.fillMaxWidth().height(200.dp)) {
         val width = size.width
         val height = size.height
-        val minVal = 189f
-        val maxVal = 199f
+        val minVal = (data.minOrNull() ?: 0f).coerceAtMost(0f)
+        val maxVal = ((data.maxOrNull() ?: 1f) + 5f).coerceAtLeast(10f)
         val range = maxVal - minVal
 
         val spacePerItem = width / (data.size - 1).coerceAtLeast(1)
-        val points = data.mapIndexed { index, weight ->
+        val points = data.mapIndexed { index, reps ->
             Offset(
                 x = index * spacePerItem,
-                y = height - ((weight - minVal) / range * height)
+                y = height - ((reps - minVal) / range * height)
             )
         }
 

@@ -392,7 +392,7 @@ class TrainDatabaseHelper(context: Context) :
             recommendation = recommendation,
             recentSessions = recentSessions,
             workoutTrends = trends,
-            bodyweightTrend = listOf(196f, 195.5f, 194.8f, 195.1f, 194.2f, 193.5f, 193.8f, 193.0f, 192.5f, 192.0f)
+            repetitionTrend = recentSessions.map { it.repetitions.toFloat() }.reversed(),
         )
     }
 
