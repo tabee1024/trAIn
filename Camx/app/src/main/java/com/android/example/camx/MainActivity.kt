@@ -17,64 +17,50 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
- * Main entry point for the Camx AI workout coach application.
+ * Main entry point for the Camx AI workout coach.
  *
- * Supports multiple exercises via the [ExerciseCounter] interface. The user
- * can switch between exercises using the exercise toggle button in the UI.
- * Each switch resets the current counter and begins fresh.
+ * Supported exercises (toggle order): Push-Ups → Squats → Lunges → Push-Ups
  *
- * Current supported exercises:
- * - [PushUpCounter] — tracks elbow flexion angle
- * - [SquatCounter]  — tracks knee flexion angle
+ * The mini preview panel in [PoseOverlay] continuously animates the current
+ * exercise using [GhostModel.interpolate], demonstrating the movement with a
+ * glowing human-shaped ghost figure.
  *
- * The full pipeline per frame:
- * 1. CameraX captures the frame
- * 2. Frame is rotated to match display orientation
- * 3. [PoseLandmarkerHelper] runs MediaPipe pose detection asynchronously
- * 4. [activeCounter] analyzes landmarks → rep count + form feedback
- * 5. [PoseOverlay] draws the skeleton + joint angle
- * 6. [R.id.coachText] shows rep count, phase, and feedback
- *
- * @see ExerciseCounter
- * @see PushUpCounter
- * @see SquatCounter
+ * Exercise color themes:
+ * - Push-Ups → blue ghost
+ * - Squats   → purple ghost
+ * - Lunges   → green ghost
  */
 class MainActivity : AppCompatActivity(), PoseLandmarkerHelper.PoseLandmarkerListener {
 
-    /** View binding for [R.layout.activity_main]. */
     private lateinit var binding: ActivityMainBinding
-
-    /** Manages MediaPipe Pose Landmarker initialization and frame submission. */
     private lateinit var poseLandmarkerHelper: PoseLandmarkerHelper
-
-    /** Background executor for [ImageAnalysis] — single thread to match backpressure strategy. */
     private lateinit var cameraExecutor: ExecutorService
-
-    /** Whether the front camera is active. Toggled by the camera switch FAB. */
     private var isFrontCamera = false
 
-    // --- Exercise counters ---
+    // ── Exercises ─────────────────────────────────────────────────────────────
 
     private val pushUpCounter = PushUpCounter()
     private val squatCounter  = SquatCounter()
+    private val lungeCounter  = LungeCounter()
 
-    /**
-     * All available exercise counters in toggle order.
-     * Add new exercises here to automatically include them in the cycle.
-     */
-    private val exercises: List<ExerciseCounter> = listOf(pushUpCounter, squatCounter)
+    private val exercises: List<ExerciseCounter> = listOf(
+        pushUpCounter,
+        squatCounter,
+        lungeCounter
+    )
 
-    /** Index into [exercises] for the currently active exercise. */
     private var exerciseIndex = 0
 
-    /**
-     * The currently active exercise counter.
-     * Switching exercises resets this counter and updates the UI label.
-     */
     private val activeCounter: ExerciseCounter
         get() = exercises[exerciseIndex]
 
-    /** Handles the camera permission request result. */
+    private val nextExerciseName: String
+        get() = exercises[(exerciseIndex + 1) % exercises.size].exerciseName
+
+    private var lastCoachResult: ExerciseCounter.CoachResult? = null
+
+    // ── Permission ────────────────────────────────────────────────────────────
+
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) startCamera()
@@ -84,6 +70,8 @@ class MainActivity : AppCompatActivity(), PoseLandmarkerHelper.PoseLandmarkerLis
             }
         }
 
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -92,21 +80,26 @@ class MainActivity : AppCompatActivity(), PoseLandmarkerHelper.PoseLandmarkerLis
         cameraExecutor = Executors.newSingleThreadExecutor()
         poseLandmarkerHelper = PoseLandmarkerHelper(this, this)
 
-        // Camera switch button — toggle front/back
+        // Set initial exercise on the overlay so ghost animates immediately
+        binding.poseOverlay.setExercise(activeCounter.exerciseName)
+
         binding.cameraSwitchButton.setOnClickListener {
             isFrontCamera = !isFrontCamera
             startCamera()
         }
 
-        // Exercise toggle button — cycle through available exercises
         binding.exerciseToggleButton.setOnClickListener {
             exerciseIndex = (exerciseIndex + 1) % exercises.size
             activeCounter.reset()
+            lastCoachResult = null
             binding.exerciseToggleButton.text = activeCounter.exerciseName
-            binding.coachText.text = "Switched to ${activeCounter.exerciseName} — get into position!"
+            binding.coachText.text = "Switched to ${activeCounter.exerciseName}!"
+
+            // ✅ Tell overlay which exercise is now active so ghost updates
+            binding.poseOverlay.setExercise(activeCounter.exerciseName)
+            binding.poseOverlay.clear()
         }
 
-        // Set initial button label
         binding.exerciseToggleButton.text = activeCounter.exerciseName
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -118,14 +111,6 @@ class MainActivity : AppCompatActivity(), PoseLandmarkerHelper.PoseLandmarkerLis
         }
     }
 
-    /**
-     * Binds CameraX [Preview] and [ImageAnalysis] to this activity's lifecycle.
-     *
-     * Each frame is:
-     * 1. Converted to [Bitmap] via [ImageProxy.toBitmap]
-     * 2. Rotated to match display orientation using [ImageInfo.rotationDegrees]
-     * 3. Passed to [PoseLandmarkerHelper.detectLiveStream] for async detection
-     */
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
@@ -142,14 +127,11 @@ class MainActivity : AppCompatActivity(), PoseLandmarkerHelper.PoseLandmarkerLis
                 .also {
                     it.setAnalyzer(cameraExecutor) { imageProxy ->
                         val bitmap = imageProxy.toBitmap()
-
-                        // Rotate to correct for sensor orientation (often landscape).
                         val rotationDegrees = imageProxy.imageInfo.rotationDegrees
                         val rotatedBitmap = if (rotationDegrees != 0) {
                             val matrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
                             Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
                         } else bitmap
-
                         poseLandmarkerHelper.detectLiveStream(rotatedBitmap, isFrontCamera)
                         imageProxy.close()
                     }
@@ -172,43 +154,41 @@ class MainActivity : AppCompatActivity(), PoseLandmarkerHelper.PoseLandmarkerLis
         }, ContextCompat.getMainExecutor(this))
     }
 
-    /**
-     * Called by [PoseLandmarkerHelper] on every processed frame.
-     *
-     * Feeds landmarks into [activeCounter] and updates:
-     * - [PoseOverlay] with the skeleton and current joint angle
-     * - [R.id.coachText] with rep count, phase label, and form feedback
-     *
-     * Always invoked on a MediaPipe background thread — UI updates
-     * dispatched via [runOnUiThread].
-     *
-     * @param result      Pose detection result containing normalized landmarks.
-     * @param imageWidth  Width of the analyzed frame in pixels.
-     * @param imageHeight Height of the analyzed frame in pixels.
-     */
     override fun onResults(result: PoseLandmarkerResult, imageWidth: Int, imageHeight: Int) {
         runOnUiThread {
             binding.poseOverlay.setResults(result, imageWidth, imageHeight)
 
             if (result.landmarks().isEmpty()) {
                 binding.coachText.text = "No pose detected — step back!"
+                val prev = lastCoachResult
+                if (prev != null) {
+                    val cur  = GhostModel.getGhost(activeCounter.exerciseName, prev.phaseLabel)
+                    val next = GhostModel.getNextGhost(activeCounter.exerciseName, prev.phaseLabel, nextExerciseName)
+                    binding.poseOverlay.setCoachData(prev.primaryAngle, cur, next)
+                }
                 return@runOnUiThread
             }
 
             val coachResult = activeCounter.update(result.landmarks()[0])
+            lastCoachResult = coachResult
+
+            val currentGhost = GhostModel.getGhost(activeCounter.exerciseName, coachResult.phaseLabel)
+            val nextGhost    = GhostModel.getNextGhost(activeCounter.exerciseName, coachResult.phaseLabel, nextExerciseName)
+            binding.poseOverlay.setCoachData(coachResult.primaryAngle, currentGhost, nextGhost)
+
+            // Show L/R breakdown for lunges
+            val repText = if (activeCounter is LungeCounter) {
+                val lc = activeCounter as LungeCounter
+                "L: ${lc.leftRepCount}  R: ${lc.rightRepCount}"
+            } else {
+                "Reps: ${coachResult.repCount}"
+            }
 
             binding.coachText.text =
-                "${activeCounter.exerciseName}  |  Reps: ${coachResult.repCount}  |  ${coachResult.phaseLabel}\n${coachResult.feedback}"
-
-            binding.poseOverlay.setCoachData(coachResult.primaryAngle)
+                "${activeCounter.exerciseName}  |  $repText  |  ${coachResult.phaseLabel}\n${coachResult.feedback}"
         }
     }
 
-    /**
-     * Called when MediaPipe encounters an unrecoverable error.
-     *
-     * @param error Human-readable error description.
-     */
     override fun onError(error: String) {
         Log.e("PoseLandmarker", error)
         runOnUiThread { binding.coachText.text = "Error: $error" }
