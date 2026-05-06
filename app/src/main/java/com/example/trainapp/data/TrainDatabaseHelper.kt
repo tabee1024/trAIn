@@ -18,6 +18,11 @@ import kotlin.math.max
 class TrainDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
+    override fun onConfigure(db: SQLiteDatabase) {
+        super.onConfigure(db)
+        db.setForeignKeyConstraintsEnabled(true)
+    }
+
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
             """
@@ -54,7 +59,7 @@ class TrainDatabaseHelper(context: Context) :
                 duration INTEGER,
                 calories_burned INTEGER,
                 video_uri TEXT,
-                FOREIGN KEY (user_id) REFERENCES Users(user_id)
+                FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
             )
             """.trimIndent(),
         )
@@ -68,7 +73,7 @@ class TrainDatabaseHelper(context: Context) :
                 repetitions INTEGER,
                 duration INTEGER,
                 camera_mode TEXT,
-                FOREIGN KEY (session_id) REFERENCES Workout_Sessions(session_id),
+                FOREIGN KEY (session_id) REFERENCES Workout_Sessions(session_id) ON DELETE CASCADE,
                 FOREIGN KEY (exercise_id) REFERENCES Exercises(exercise_id)
             )
             """.trimIndent(),
@@ -86,7 +91,7 @@ class TrainDatabaseHelper(context: Context) :
                 correct_rep_percentage REAL,
                 feedback TEXT,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (log_id) REFERENCES Exercise_Logs(log_id)
+                FOREIGN KEY (log_id) REFERENCES Exercise_Logs(log_id) ON DELETE CASCADE
             )
             """.trimIndent(),
         )
@@ -100,7 +105,7 @@ class TrainDatabaseHelper(context: Context) :
                 total_repetitions INTEGER,
                 improvement_percentage REAL,
                 last_updated TEXT,
-                FOREIGN KEY (user_id) REFERENCES Users(user_id)
+                FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
             )
             """.trimIndent(),
         )
@@ -111,7 +116,7 @@ class TrainDatabaseHelper(context: Context) :
                 user_id INTEGER,
                 recommendation_text TEXT,
                 created_date TEXT,
-                FOREIGN KEY (user_id) REFERENCES Users(user_id)
+                FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
             )
             """.trimIndent(),
         )
@@ -335,7 +340,30 @@ class TrainDatabaseHelper(context: Context) :
             }
         }
 
-        val improvement = 0.0 // Simplified for now
+        val previousFilter = when (period) {
+            "Day" -> "date(session_date) >= date('now', '-2 day') AND date(session_date) < date('now', '-1 day')"
+            "Week" -> "date(session_date) >= date('now', '-14 days') AND date(session_date) < date('now', '-7 days')"
+            "Month" -> "date(session_date) >= date('now', '-60 days') AND date(session_date) < date('now', '-30 days')"
+            "Year" -> "date(session_date) >= date('now', '-730 days') AND date(session_date) < date('now', '-365 days')"
+            else -> "1=0"
+        }
+        val previousAvgFormScore = readableDatabase.rawQuery(
+            """
+            SELECT AVG(a.form_score)
+            FROM Workout_Sessions s
+            JOIN Exercise_Logs l ON s.session_id = l.session_id
+            JOIN AI_Analysis a ON a.log_id = l.log_id
+            WHERE s.user_id = ? AND $previousFilter
+            """.trimIndent(),
+            arrayOf(user.userId.toString()),
+        ).use { cursor ->
+            if (cursor.moveToFirst() && !cursor.isNull(0)) cursor.getDouble(0) else 0.0
+        }
+        val improvement = if (previousAvgFormScore == 0.0) {
+            0.0
+        } else {
+            ((avgFormScore - previousAvgFormScore) / previousAvgFormScore) * 100.0
+        }
 
         val recommendation = readableDatabase.rawQuery(
             """
@@ -389,6 +417,7 @@ class TrainDatabaseHelper(context: Context) :
             totalSessions = totalSessions,
             totalRepetitions = totalRepetitions,
             improvementPercentage = improvement,
+            currentStreakDays = getCurrentStreakDays(user.userId),
             recommendation = recommendation,
             recentSessions = recentSessions,
             workoutTrends = trends,
@@ -540,11 +569,62 @@ class TrainDatabaseHelper(context: Context) :
     }
 
     fun deleteSession(sessionId: Int) {
-        writableDatabase.delete("Workout_Sessions", "session_id = ?", arrayOf(sessionId.toString()))
+        writableDatabase.beginTransaction()
+        try {
+            val sessionArgs = arrayOf(sessionId.toString())
+            writableDatabase.delete(
+                "AI_Analysis",
+                "log_id IN (SELECT log_id FROM Exercise_Logs WHERE session_id = ?)",
+                sessionArgs,
+            )
+            writableDatabase.delete("Exercise_Logs", "session_id = ?", sessionArgs)
+            writableDatabase.delete("Workout_Sessions", "session_id = ?", sessionArgs)
+            writableDatabase.setTransactionSuccessful()
+        } finally {
+            writableDatabase.endTransaction()
+        }
+    }
+
+    private fun getCurrentStreakDays(userId: Long): Int {
+        val dates = readableDatabase.rawQuery(
+            """
+            SELECT DISTINCT session_date
+            FROM Workout_Sessions
+            WHERE user_id = ?
+            ORDER BY session_date DESC
+            """.trimIndent(),
+            arrayOf(userId.toString()),
+        ).use { cursor ->
+            buildList {
+                while (cursor.moveToNext()) {
+                    runCatching { LocalDate.parse(cursor.getString(0)) }
+                        .getOrNull()
+                        ?.let(::add)
+                }
+            }
+        }
+        if (dates.isEmpty()) return 0
+
+        var expectedDate = LocalDate.now()
+        if (dates.first().isBefore(expectedDate)) {
+            expectedDate = dates.first()
+        }
+
+        var streak = 0
+        for (date in dates) {
+            when {
+                date == expectedDate -> {
+                    streak += 1
+                    expectedDate = expectedDate.minusDays(1)
+                }
+                date.isBefore(expectedDate) -> break
+            }
+        }
+        return streak
     }
 
     companion object {
         private const val DATABASE_NAME = "train_application.db"
-        private const val DATABASE_VERSION = 7
+        private const val DATABASE_VERSION = 8
     }
 }

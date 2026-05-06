@@ -18,6 +18,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,14 +30,17 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-// Theme Colors for Dark Dashboard
-val DarkBackground = Color(0xFF121212)
-val CardBackground = Color(0xFF1E1E1E)
-val AccentPushups = Color(0xFF4A90E2)
+// Progress dashboard colors aligned with the demo flow.
+val DarkBackground = Color(0xFFF8F8F3)
+val CardBackground = Color(0xFFEAF0F8)
+val AccentPushups = Color(0xFF5476B1)
 val AccentSquats = Color(0xFF50E3C2)
 val AccentLunges = Color(0xFFF5A623)
 val AccentCrunches = Color(0xFFBD10E0)
-val TextGreen = Color(0xFF7ED321)
+val TextGreen = Color(0xFF5E7D5B)
+private val DemoInk = Color(0xFF2E4053)
+private val DemoMuted = Color(0xFF7D8790)
+private val DemoBrown = Color(0xFF8A6657)
 
 @Composable
 fun ProgressScreen(
@@ -73,6 +77,11 @@ fun ProgressScreen(
                     TimeRangeSelector(selectedPeriod) { selectedPeriod = it }
                 }
 
+                // Demo-style latest workout summary backed by saved sessions.
+                item {
+                    LatestWorkoutSummaryCard(snapshot!!)
+                }
+
                 // Top Header Stats
                 item {
                     HeaderStatsRow(snapshot!!, selectedPeriod)
@@ -107,9 +116,9 @@ fun ProgressScreen(
                 // Session History List
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.TrendingUp, contentDescription = null, tint = AccentPushups)
+                        Icon(Icons.Default.TrendingUp, contentDescription = null, tint = DemoInk)
                         Spacer(Modifier.width(8.dp))
-                        Text("Session History", style = MaterialTheme.typography.titleLarge, color = Color.White)
+                        Text("Session History", style = MaterialTheme.typography.titleLarge, color = DemoInk)
                     }
                 }
 
@@ -139,8 +148,8 @@ fun TimeRangeSelector(selected: String, onSelected: (String) -> Unit) {
             Button(
                 onClick = { onSelected(period) },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isSelected) AccentPushups else CardBackground,
-                    contentColor = if (isSelected) Color.White else Color.Gray
+                    containerColor = if (isSelected) DemoBrown else Color.White,
+                    contentColor = if (isSelected) Color.White else DemoInk
                 ),
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.weight(1f),
@@ -162,28 +171,66 @@ fun HeaderStatsRow(snapshot: ProgressSnapshot, period: String) {
         else -> "this week"
     }
 
-    Row(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        HeaderStatItem("TOTAL SESSIONS", snapshot.totalSessions.toString(), "+${(snapshot.totalSessions * 0.1).toInt().coerceAtLeast(1)} $subtextSuffix")
-        HeaderStatItem("AVG FORM SCORE", String.format("%.0f", snapshot.averageFormScore), "+${(snapshot.averageFormScore * 0.05).toInt()} vs last $period")
-        HeaderStatItem("CURRENT STREAK", "7 days", "Personal best: 12", isStreak = true)
-        HeaderStatItem("TOTAL REPS", snapshot.totalRepetitions.toString(), "+${(snapshot.totalRepetitions * 0.1).toInt().coerceAtLeast(10)} $subtextSuffix")
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            HeaderStatItem(
+                label = "TOTAL SESSIONS",
+                value = snapshot.totalSessions.toString(),
+                subtext = "$subtextSuffix",
+                modifier = Modifier.weight(1f),
+            )
+            HeaderStatItem(
+                label = "AVG FORM SCORE",
+                value = "${String.format("%.0f", snapshot.averageFormScore)}%",
+                subtext = "${String.format("%+.1f", snapshot.improvementPercentage)}% vs last $period",
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            HeaderStatItem(
+                label = "CURRENT STREAK",
+                value = "${snapshot.currentStreakDays} days",
+                subtext = if (snapshot.currentStreakDays > 0) "Keep showing up" else "Start today",
+                isStreak = true,
+                modifier = Modifier.weight(1f),
+            )
+            HeaderStatItem(
+                label = "TOTAL REPS",
+                value = snapshot.totalRepetitions.toString(),
+                subtext = "$subtextSuffix",
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }
 
 @Composable
-fun HeaderStatItem(label: String, value: String, subtext: String, isStreak: Boolean = false) {
-    Column {
-        Text(label, fontSize = 10.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
-        Text(value, fontSize = 24.sp, color = Color.White, fontWeight = FontWeight.Bold)
-        Text(
-            subtext, 
-            fontSize = 10.sp, 
-            color = if (isStreak) AccentLunges else TextGreen,
-            fontWeight = FontWeight.Medium
-        )
+fun HeaderStatItem(
+    label: String,
+    value: String,
+    subtext: String,
+    modifier: Modifier = Modifier,
+    isStreak: Boolean = false,
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+    ) {
+        Column(Modifier.padding(14.dp)) {
+            Text(label, fontSize = 10.sp, color = DemoMuted, fontWeight = FontWeight.Bold)
+            Text(value, fontSize = 23.sp, color = DemoInk, fontWeight = FontWeight.Bold)
+            Text(
+                subtext,
+                fontSize = 10.sp,
+                color = if (isStreak) DemoBrown else TextGreen,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }
 
@@ -199,9 +246,9 @@ fun DashboardCard(
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(Modifier.padding(20.dp)) {
-            Text(title, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(title, color = DemoInk, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             if (subtitle != null) {
-                Text(subtitle, color = Color.Gray, fontSize = 12.sp)
+                Text(subtitle, color = DemoMuted, fontSize = 12.sp)
             }
             Spacer(Modifier.height(16.dp))
             content()
@@ -220,7 +267,78 @@ fun AIInsightCard(recommendation: String) {
         Column(Modifier.padding(16.dp)) {
             Text("AI Coaching Tip", color = AccentPushups, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(4.dp))
-            Text(recommendation, color = Color.White, style = MaterialTheme.typography.bodyLarge)
+            Text(recommendation, color = DemoInk, style = MaterialTheme.typography.bodyLarge)
+        }
+    }
+}
+
+@Composable
+fun LatestWorkoutSummaryCard(snapshot: ProgressSnapshot) {
+    val latest = snapshot.recentSessions.firstOrNull()
+    DashboardCard(title = "Workout Summary") {
+        if (latest == null) {
+            Text(
+                "Finish your first workout to unlock your reps, accuracy, time spent, and coaching history.",
+                color = DemoMuted,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            return@DashboardCard
+        }
+
+        SummaryMetricRow("Reps Completed", latest.repetitions.toString())
+        Spacer(Modifier.height(10.dp))
+        SummaryMetricRow("Accuracy", "${latest.formScore.toInt()}%")
+        Spacer(Modifier.height(10.dp))
+        SummaryMetricRow("Time Spent", "${latest.durationMinutes} min")
+        Spacer(Modifier.height(18.dp))
+        AccuracyRing(latest.formScore.toFloat())
+    }
+}
+
+@Composable
+fun SummaryMetricRow(label: String, value: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(label, color = DemoMuted, fontWeight = FontWeight.SemiBold)
+            Text(value, color = DemoInk, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+fun AccuracyRing(score: Float) {
+    Box(
+        modifier = Modifier.fillMaxWidth().height(118.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Canvas(modifier = Modifier.size(96.dp)) {
+            drawArc(
+                color = Color(0xFFD7DCD0),
+                startAngle = -90f,
+                sweepAngle = 360f,
+                useCenter = false,
+                style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round),
+            )
+            drawArc(
+                color = AccentPushups,
+                startAngle = -90f,
+                sweepAngle = (score.coerceIn(0f, 100f) / 100f) * 360f,
+                useCenter = false,
+                style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round),
+            )
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("${score.toInt()}%", color = DemoInk, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text("Accuracy", color = DemoMuted, fontSize = 11.sp)
         }
     }
 }
@@ -252,7 +370,7 @@ fun LegendItem(label: String, color: Color, isBox: Boolean = false) {
                 .background(color, shape = if (isBox) RoundedCornerShape(2.dp) else RoundedCornerShape(2.dp))
         )
         Spacer(Modifier.width(6.dp))
-        Text(label, color = Color.LightGray, fontSize = 12.sp)
+        Text(label, color = DemoInk, fontSize = 12.sp)
     }
 }
 
@@ -267,7 +385,7 @@ fun MultiLineChart(trends: Map<String, List<Float>>) {
         for (i in 0..gridLines) {
             val y = height - (i * height / gridLines)
             drawLine(
-                color = Color.DarkGray.copy(alpha = 0.3f),
+                color = DemoMuted.copy(alpha = 0.25f),
                 start = Offset(0f, y),
                 end = Offset(width, y),
                 strokeWidth = 1.dp.toPx()
@@ -308,7 +426,12 @@ fun MultiLineChart(trends: Map<String, List<Float>>) {
 
 @Composable
 fun RepetitionChart(data: List<Float>) {
-    if (data.isEmpty()) return
+    if (data.isEmpty()) {
+        Box(Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
+            Text("Complete a workout to start your rep trend.", color = DemoMuted)
+        }
+        return
+    }
     
     Canvas(modifier = Modifier.fillMaxWidth().height(200.dp)) {
         val width = size.width
@@ -358,8 +481,8 @@ fun SessionHistoryItem(session: WorkoutSessionCard, onWatchVideo: (String) -> Un
     ) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(session.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
-                Text(session.performedOn, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                Text(session.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = DemoInk)
+                Text(session.performedOn, style = MaterialTheme.typography.labelSmall, color = DemoMuted)
                 if (session.videoUri != null) {
                     Spacer(Modifier.height(8.dp))
                     Button(
@@ -373,7 +496,7 @@ fun SessionHistoryItem(session: WorkoutSessionCard, onWatchVideo: (String) -> Un
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("${session.repetitions} Reps", fontWeight = FontWeight.SemiBold, color = Color.White)
+                Text("${session.repetitions} Reps", fontWeight = FontWeight.SemiBold, color = DemoInk)
                 Text("Score: ${session.formScore.toInt()}%", color = if (session.formScore > 80) TextGreen else AccentLunges)
             }
         }

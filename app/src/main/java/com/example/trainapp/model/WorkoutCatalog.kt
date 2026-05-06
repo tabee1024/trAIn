@@ -115,6 +115,7 @@ data class ProgressSnapshot(
     val improvementPercentage: Double,
     val recommendation: String,
     val recentSessions: List<WorkoutSessionCard>,
+    val currentStreakDays: Int = 0,
     val workoutTrends: Map<String, List<Float>> = emptyMap(),
     val repetitionTrend: List<Float> = emptyList(),
 )
