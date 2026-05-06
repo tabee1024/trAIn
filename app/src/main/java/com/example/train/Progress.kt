@@ -23,6 +23,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +33,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.train.ui.theme.*
+import com.example.train.MotivationPopup
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @Composable
 fun Progress(
@@ -40,6 +45,19 @@ fun Progress(
     onExit: () -> Unit,
     onRestart: () -> Unit
 ) {
+    // 1. Add state to control the popup visibility
+    var showMotivation by remember { mutableStateOf(false) }
+
+    // 2. Show the MotivationPopup when state is true
+    if (showMotivation) {
+        MotivationPopup(
+            reps = reps,
+            accuracy = accuracy,
+            timeSpent = timeSpent,
+            onDismiss = { showMotivation = false }
+        )
+    }
+
     Column(
         modifier = Modifier
             .background(color = Color.White)
@@ -49,11 +67,7 @@ fun Progress(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-
-        // Top content
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier.height(90.dp))
 
             Text(
@@ -65,19 +79,27 @@ fun Progress(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            WorkoutStats(
-                reps = reps,
-                accuracy = accuracy,
-                timeSpent = timeSpent
-            )
+            WorkoutStats(reps = reps, accuracy = accuracy, timeSpent = timeSpent)
+
             Spacer(modifier = Modifier.height(32.dp))
 
             // Accuracy Indicator
             AccuracyIndicator(accuracy = accuracy)
 
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 3. Add a button to view Insights/Motivation
+            Button(
+                onClick = { showMotivation = true },
+                modifier = Modifier.fillMaxWidth(0.7f),
+                colors = ButtonDefaults.buttonColors(containerColor = SteelBlue)
+            ) {
+                Text("View Coaching Tips")
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Bottom buttons
+            // Bottom buttons (Keep your existing Home/Restart buttons here)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -85,10 +107,7 @@ fun Progress(
                 Button(
                     onClick = onExit,
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = StoneGrey, // background color
-                        contentColor = Color.White // icon text color
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = StoneGrey)
                 ) {
                     Text(text = "Go to Home")
                 }
@@ -98,10 +117,7 @@ fun Progress(
                 Button(
                     onClick = onRestart,
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = StoneGrey, // background color
-                        contentColor = Color.White // icon text color
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = StoneGrey)
                 ) {
                     Text(text = "Restart Workout")
                 }

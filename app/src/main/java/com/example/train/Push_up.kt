@@ -80,7 +80,7 @@ fun Push_up(
             Text(
                 text = "Push Up",
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = StoneGrey
+                color = CharcoalBlue
             )
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -88,15 +88,15 @@ fun Push_up(
                 text = "A classic upper‑body exercise that strengthens your chest, shoulders, triceps, and core.",
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium, fontStyle = Italic),
                 fontSize = 14.sp,
-                color = SandBeige
+                color = CharcoalBlue
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = onPushUpClick,
-                colors = ButtonDefaults.buttonColors(containerColor = StoneGrey)
+                colors = ButtonDefaults.buttonColors(containerColor = AccentGold)
             ) {
-                Text(text = "Start Workout", color = SoftBlueTint, style = MaterialTheme.typography.bodyLarge)
+                Text(text = "Start Workout", color = CharcoalBlue, style = MaterialTheme.typography.bodyLarge)
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = "Arrow"
@@ -107,7 +107,7 @@ fun Push_up(
             Text(
                 text = "Details",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = StoneGrey
+                color = CharcoalBlue
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -128,20 +128,20 @@ fun Push_up(
                 border = BorderStroke(width = 1.dp, color = Brown)
             ) {
                 Text(text = "Watch Video Tutorial",
-                    color = StoneGrey,
+                    color = Brown,
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
                 )
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = "External link",
-                    tint = StoneGrey
+                    tint = Brown
                 )
             }
 
             Text(
                 text = "How to Perform",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = StoneGrey
+                color = Brown
             )
             Spacer(modifier = Modifier.height(8.dp))
 

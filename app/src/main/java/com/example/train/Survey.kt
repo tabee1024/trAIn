@@ -63,9 +63,14 @@ data class WorkoutFrequency(
     }
 }
 
-enum class WorkoutType(val label: String) {
-    STRENGTH("Strength"), CARDIO("Cardio"), HIIT("HIIT"), YOGA_MOBILITY("Yoga / Mobility"),
-    SPORTS("Sports"), BODYWEIGHT("Bodyweight"), OUTDOOR("Outdoor")
+enum class WorkoutCategory(val label: String) {
+    STRENGTH("Strength"),
+    CARDIO("Cardio"),
+    HIIT("HIIT"),
+    YOGA_MOBILITY("Yoga / Mobility"),
+    SPORTS("Sports"),
+    BODYWEIGHT("Bodyweight"),
+    OUTDOOR("Outdoor")
 }
 
 enum class InjuryOrConcern(val label: String) {
@@ -87,7 +92,7 @@ data class UserSurvey(
     val fitnessLevel: FitnessLevel? = null,
     val primaryGoal: PrimaryGoal? = null,
     val workoutFrequency: WorkoutFrequency? = null,
-    val enjoyedWorkouts: Set<WorkoutType> = emptySet(),
+    val enjoyedWorkouts: Set<WorkoutCategory> = emptySet(),
     val injuries: Set<InjuryOrConcern> = emptySet(),
     val previousExperience: ExperienceLevel? = null
 )
@@ -127,7 +132,7 @@ private fun SurveyContent(userId: String, onSubmitted: () -> Unit) {
     var submitting by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().verticalScroll(scroll).padding(20.dp)) {
-        Text("Welcome, $userId", style = MaterialTheme.typography.titleMedium)
+        Text("Welcome $userId", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(16.dp))
 
         Text("What should we call you?", fontWeight = FontWeight.Bold)
@@ -192,6 +197,7 @@ private fun <T> SingleChoiceGroup(title: String, options: List<T>, selected: T?,
             is FitnessLevel -> it.label
             is PrimaryGoal -> it.label
             is ExperienceLevel -> it.label
+            is WorkoutCategory -> it.label
             else -> it.name
         }
     }

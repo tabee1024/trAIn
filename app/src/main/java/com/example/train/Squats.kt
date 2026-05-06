@@ -74,7 +74,7 @@ fun Squats(
             Text(
                 text = "Squats",
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = StoneGrey
+                color = CharcoalBlue
             )
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -82,15 +82,15 @@ fun Squats(
                 text = "A foundational exercise that builds strength in the legs and core.",
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium, fontStyle = Italic),
                 fontSize = 14.sp,
-                color = SandBeige
+                color = CharcoalBlue
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {},
-                colors = ButtonDefaults.buttonColors(containerColor = StoneGrey)
+                colors = ButtonDefaults.buttonColors(containerColor = AccentGold)
             ) {
-                Text(text = "Start Workout", color = SoftBlueTint, style = MaterialTheme.typography.bodyLarge)
+                Text(text = "Start Workout", color = CharcoalBlue, style = MaterialTheme.typography.bodyLarge)
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = "Arrow"
@@ -101,7 +101,7 @@ fun Squats(
             Text(
                 text = "Details",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = StoneGrey
+                color = CharcoalBlue
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -122,13 +122,13 @@ fun Squats(
                 border = BorderStroke(width = 1.dp, color = Brown)
             ) {
                 Text(text = "Watch Video Tutorial",
-                    color = StoneGrey,
+                    color = CharcoalBlue,
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
                 )
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = "External link",
-                    tint = StoneGrey
+                    tint = CharcoalBlue
                 )
             }
 
@@ -136,7 +136,7 @@ fun Squats(
 
             Text(
                 text = "How to Perform",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold), color = StoneGrey )
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold), color = CharcoalBlue )
 
             Spacer(modifier = Modifier.height(8.dp))
 

@@ -92,7 +92,7 @@ fun Lunges(
                 colors = ButtonDefaults.buttonColors(containerColor = AccentGold),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text(text = "Start Workout", color = Color.White)
+                Text(text = "Start Workout", color = CharcoalBlue)
                 Spacer(Modifier.width(8.dp))
                 Icon(Icons.Default.PlayArrow, contentDescription = null)
             }

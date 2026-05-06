@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.train.ui.theme.StoneGrey
 import com.example.train.ui.theme.AccentGold
+import com.example.train.ui.theme.CharcoalBlue
 
 @Composable
 fun Workouts(onWorkoutSelected: (String) -> Unit) {
@@ -60,7 +61,7 @@ fun Workouts(onWorkoutSelected: (String) -> Unit) {
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     fontSize = 32.sp,
-                    color = StoneGrey
+                    color = CharcoalBlue
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

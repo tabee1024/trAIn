@@ -86,6 +86,46 @@ fun TrAInNavigationWrapper() {
     ) {
         Scaffold(
             containerColor = OffWhite,
+            // --- TEMPORARY SECTION ---
+            floatingActionButton = {
+                if (currentRoute == Screens.Home.screen) {
+                    var showDebugMotivation by remember { mutableStateOf(false) }
+                    var debugStats by remember { mutableStateOf(Triple(0, 0, "00:00")) }
+
+                    Column(horizontalAlignment = Alignment.End) {
+                        if (showDebugMotivation) {
+                            MotivationPopup(
+                                reps = debugStats.first,
+                                accuracy = debugStats.second,
+                                timeSpent = debugStats.third,
+                                onDismiss = { showDebugMotivation = false }
+                            )
+                        }
+
+                        // Fake Data Instance 1: High Performance
+                        SmallFloatingActionButton(
+                            onClick = {
+                                debugStats = Triple(45, 95, "12:30")
+                                showDebugMotivation = true
+                            },
+                            containerColor = SteelBlue,
+                            contentColor = Color.White,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) { Text("High") }
+
+                        // Fake Data Instance 2: Needs Improvement
+                        SmallFloatingActionButton(
+                            onClick = {
+                                debugStats = Triple(8, 55, "02:15")
+                                showDebugMotivation = true
+                            },
+                            containerColor = Color.Red,
+                            contentColor = Color.White
+                        ) { Text("Low") }
+                    }
+                }
+            },
+            // --- END TEMPORARY SECTION ---
             topBar = {
                 if (currentRoute !in authRoutes) {
                     CenterAlignedTopAppBar(
@@ -113,25 +153,23 @@ fun TrAInNavigationWrapper() {
                 startDestination = Screens.SignUp.screen,
                 modifier = Modifier.padding(paddingValues)
             ) {
-                // SIGN UP -> SURVEY
+                // SIGN UP -> Redirect to HOME
                 composable(Screens.SignUp.screen) {
                     SignUpScreen { userId ->
-                        navController.navigate("survey/$userId") {
+                        navController.navigate(Screens.Home.screen) {
+                            // This ensures the user can't click "back" to return to the Sign Up screen
                             popUpTo(Screens.SignUp.screen) { inclusive = true }
                         }
                     }
                 }
 
-                // SURVEY -> HOME
+                // SURVEY -> Return to HOME
                 composable(route = "survey/{userId}") { backStackEntry ->
                     val userId = backStackEntry.arguments?.getString("userId") ?: ""
                     SurveyScreenRoute(
                         userId = userId,
                         onDone = {
-                            navController.navigate(Screens.Home.screen) {
-                                // This ensures the user can't go back to the survey after finishing
-                                popUpTo("survey/{userId}") { inclusive = true }
-                            }
+                            navController.popBackStack()
                         }
                     )
                 }
@@ -202,7 +240,14 @@ fun TrAInDrawerContent(navController: NavHostController, onClose: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text("trAIn Menu", color = CharcoalBlue, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = CharcoalBlue.copy(alpha = 0.2f))
-        val menuItems = listOf("Home" to Screens.Home.screen, "Profile" to Screens.Profile.screen, "Goals" to Screens.Goals.screen, "Workouts" to Screens.Workouts.screen, "Settings" to Screens.Settings.screen)
+        val menuItems = listOf(
+            "About Us" to Screens.AboutUs.screen,
+            "Home" to Screens.Home.screen,
+            "Profile" to Screens.Profile.screen,
+            "Goals" to Screens.Goals.screen,
+            "Workouts" to Screens.Workouts.screen,
+            "Settings" to Screens.Settings.screen,
+            "Help" to Screens.Help.screen)
         menuItems.forEach { (title, route) ->
             val isSelected = currentRoute == route
             NavigationDrawerItem(

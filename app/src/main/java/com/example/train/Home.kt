@@ -53,6 +53,15 @@ fun Home(navController: NavHostController) {
                 style = MaterialTheme.typography.headlineMedium
             )
 
+            // --- NEW: Survey Banner Logic ---
+            if (survey == null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                SurveyBanner(onStartSurvey = {
+                    navController.navigate("survey/Trainee")
+                })
+            }
+            // --------------------------------
+
             // Reusing your SearchBar component
             SearchBar(query = searchQuery, onQueryChange = { searchQuery = it })
 
@@ -87,6 +96,45 @@ fun Home(navController: NavHostController) {
             modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp),
             onClick = { navController.navigate(Screens.Help.screen) }
         )
+    }
+}
+
+// --- NEW: Survey Banner Component ---
+@Composable
+fun SurveyBanner(onStartSurvey: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = SteelBlue),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Personalize your plan!",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = "Complete the user survey",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 12.sp
+                )
+            }
+            Button(
+                onClick = onStartSurvey,
+                colors = ButtonDefaults.buttonColors(containerColor = AccentGold),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Start", color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        }
     }
 }
 
@@ -170,7 +218,13 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         singleLine = true,
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = CharcoalBlue) },
+        leadingIcon = {
+            Icon(
+                Icons.Default.Search,
+                contentDescription = null,
+                tint = CharcoalBlue
+            )
+        },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = CharcoalBlue,
             unfocusedBorderColor = CharcoalBlue.copy(alpha = 0.3f),

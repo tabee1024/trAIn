@@ -13,6 +13,7 @@ val SandBeige = Color(0xFFD0B990)
 val StoneGrey = Color(0xFFC4C4B5)
 val CharcoalBlue = Color(0xFF2E4057) // Used for Text and Headlines
 val Brown = Color(0xFF43302D)
+val darkBeige = Color(0xFF847360)
 
 // --- 2. Legacy / Original Design Colors ---
 val Edward = Color(0xFFA2AEAB)
