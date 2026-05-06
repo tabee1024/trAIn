@@ -98,7 +98,11 @@ private fun ContactSection() {
     SectionHeader("Contact Us")
 
     val items = listOf(
+<<<<<<< HEAD
         "Email Support" to "trAInsupport@example.com",
+=======
+        "Email Support" to "traAInsupport@example.com",
+>>>>>>> d58358f43abe82b78a61f5a86331aaa2bc8106d5
     )
 
     items.forEach { (title, subtitle) ->
@@ -132,7 +136,11 @@ private fun AppInfoSection() {
     SectionHeader("App Info")
 
     Column {
+<<<<<<< HEAD
         Text("Version: 1.0.1", style = MaterialTheme.typography.bodyMedium)
+=======
+        Text("Version: 1.0.0", style = MaterialTheme.typography.bodyMedium)
+>>>>>>> d58358f43abe82b78a61f5a86331aaa2bc8106d5
         Spacer(Modifier.height(8.dp))
     }
 }
